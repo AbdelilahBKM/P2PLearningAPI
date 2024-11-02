@@ -1,0 +1,6 @@
+@P2PLearningAPI_HostAddress = http://localhost:5194
+
+GET {{P2PLearningAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
