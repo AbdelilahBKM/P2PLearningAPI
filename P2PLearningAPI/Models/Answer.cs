@@ -1,33 +1,12 @@
-﻿using System;
-
-namespace P2PLearningAPI.Models
+﻿namespace P2PLearningAPI.Models
 {
     public class Answer
     {
-        public int Id { get; set; }
-        public string Content { get; set; }
-        public DateTime DatePosted { get; set; }
-
-        // Relationship with the User class
-        public int UserId { get; set; }
-        public User User { get; set; } // Navigation property for the user who posted the answer
-
-        // Relationship with the Question class
-        public int QuestionId { get; set; }
-        public Question Question { get; set; } // Navigation property for the related question
-
-        // Upvote and downvote counts for the answer
-        public int Upvotes { get; set; } = 0;
-        public int Downvotes { get; set; } = 0;
-
-        public void Upvote()
-        {
-            Upvotes++;
-        }
-
-        public void Downvote()
-        {
-            Downvotes++;
-        }
+        public long Id { get; set; }
+        public Post Post { get; set; } = null!;
+        public long PostId { get; set; }
+        public long QuestionId { get; set; }
+        public Question Question { get; set; }
+        public bool IsTheBestAnswer { get; set; } = false;
     }
 }
