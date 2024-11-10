@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using P2PLearningAPI.Models;
-
 using DotNetEnv;
 
 // b- Load environment variables from .env file

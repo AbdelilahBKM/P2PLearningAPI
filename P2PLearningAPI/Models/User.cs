@@ -1,36 +1,39 @@
-﻿namespace P2PLearningAPI.Models
+﻿using Microsoft.AspNetCore.Identity;
+using System;
+
+namespace P2PLearningAPI.Models
 {
     public class User
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public  long Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string Email { get; set; }
-        public DateTime DateJoined { get; set; }
+        public string PasswordHash { get; set; }
+        public string profilePicture { get; set; }
+        public string Bio {  get; set; }
+        public bool IsActive { get; set; }
+        public ICollection<Joining> Joinings { get; } = new HashSet<Joining>();
+        public ICollection<Post> Posts { get; } = new HashSet<Post>();
+        public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
+        public DateTime Last_Login { get; set; }
+        public bool AccountDeleted { get; set; } = false;
+        public DateTime Created_at { get; set; } = DateTime.Now;
+        public DateTime Updated_at { get; set; }
+    }
 
-        // List of questions posted by the user
-        public List<Question> Questions { get; set; } = new List<Question>();
-
-        // List of answers given by the user
-        public List<Answer> Answers { get; set; } = new List<Answer>();
-
-        // List of UserBadge entities associated with the user
-        public List<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
-
-        public int Reputation { get; set; } = 0; // This can increase based on activity like answering and upvotes
-
-        public void AddBadge(Badge badge)
+    public class UserService
+    {
+        private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
+        public void RegisterUser(User user, string password)
         {
-            UserBadges.Add(new UserBadge { Badge = badge, UserId = this.Id, BadgeId = badge.Id });
+            user.PasswordHash = _passwordHasher.HashPassword(user, password);
         }
 
-        public void IncreaseReputation(int points)
+        public bool VerifyPassword(User user, string attempt)
         {
-            Reputation += points;
-        }
-
-        public void DecreaseReputation(int points)
-        {
-            Reputation = Math.Max(0, Reputation - points);
+            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, attempt);
+            return result == PasswordVerificationResult.Success;
         }
     }
 }
