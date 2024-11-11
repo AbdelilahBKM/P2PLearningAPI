@@ -1,10 +1,11 @@
 ﻿namespace P2PLearningAPI.Models
 {
-    public class Administrator
+    public class Administrator: User
     {
-        public long Id { get; set; }
-        public User User { get; set; } = null!;
-        public long UserId { get; set; }
         public string token { get; set; } = string.Empty;
+        public Administrator(string firstname, string lastname, string email): base(firstname, lastname, email) 
+        { 
+        }
+
     }
 }
