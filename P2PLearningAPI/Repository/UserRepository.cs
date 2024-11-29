@@ -1,4 +1,5 @@
-﻿using P2PLearningAPI.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using P2PLearningAPI.Data;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -7,15 +8,18 @@ namespace P2PLearningAPI.Repository
     public class UserRepository: UserInterface
     {
         private readonly P2PLearningDbContext context;
-        public UserRepository(P2PLearningDbContext context){
+        private readonly UserService userService;
+        public UserRepository(P2PLearningDbContext context, UserService userService)
+        {
             this.context = context;
+            this.userService = userService;
         }
 
         public ICollection<User> GetUsers()
         {
             return context.Users.OrderBy(u => u.Id).ToList();
         }
-        public User GetUser(int id)
+        public User GetUser(long id)
         {
             return context.Users.Where(u => u.Id == id).FirstOrDefault();
         }
@@ -24,7 +28,7 @@ namespace P2PLearningAPI.Repository
             return context.Users.Where(u => u.Email == email).FirstOrDefault();
         }
 
-        public bool CheckUserExist(int id)
+        public bool CheckUserExist(long id)
         {
             return context.Users.Any(u => u.Id == id);
         }
@@ -34,57 +38,74 @@ namespace P2PLearningAPI.Repository
         }
         public User CreateUser(User user, string password, UserType userType)
         {
-            try
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+
+            if (CheckUserExist(user.Email))
+                throw new InvalidOperationException("A user with this email already exists.");
+
+            User newUser;
+
+            switch (userType)
             {
-                if (user == null)
-                    throw new ArgumentNullException(nameof(user));
-                if (password == null)
-                    throw new ArgumentNullException(nameof(password));
+                case UserType.Scholar:
+                    newUser = new Scholar(user.FirstName, user.LastName, user.Email);
+                    break;
+                case UserType.Administrator:
+                    newUser = new Administrator(user.FirstName, user.LastName, user.Email);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid user type", nameof(userType));
+            }
 
-                UserService userService = new UserService();
-                User newUser;
+            userService.RegisterUser(newUser, password);
+            context.Users.Add(newUser);
 
-                switch (userType) {
-                    case UserType.Scholar:
-                        newUser = new Scholar(user.FirstName, user.LastName, user.Email);
-                        break;
-                    case UserType.Administrator:
-                        newUser = new Administrator(user.FirstName, user.LastName, user.Email);
-                        break;
-                    default:
-                        throw new ArgumentException("invalid userType", nameof(userType));
-                }
-                context.Users.Add(newUser);
+            if (save())
                 return newUser;
 
-
-            }catch (ArgumentNullException ex)
-            {
-                throw new InvalidOperationException("Invalid input parameters", ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new InvalidOperationException("Invalid userType", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("An error occurred while creating the user", ex);
-            }
+            throw new InvalidOperationException("Failed to save the user to the database.");
         }
 
         public User UpdateUser(User user, UserType userType)
         {
-            throw new NotImplementedException();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            if (!CheckUserExist(user.Id))
+            {
+                throw new InvalidOperationException("User doesn't exist");
+            }
+
+            User updateUser = GetUser(user.Id);
+            updateUser.Email = user.Email;
+            updateUser.FirstName = user.FirstName;
+            updateUser.LastName = user.LastName;
+            context.Users.Update(updateUser);
+            if(save()) return updateUser;
+            throw new InvalidOperationException("Failed to update the user to the database.");
+            
         }
 
-        public bool DeleteUser(int id)
+        public bool DeleteUser(long id)
         {
-            throw new NotImplementedException();
+            User user = GetUser(id);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User doesnt exist");
+            }
+            context.Users.Remove(user);
+            return context.SaveChanges() > 0;
+
         }
 
         public bool save()
         {
-            throw new NotImplementedException();
+            return context.SaveChanges() > 0;
         }
     }
 }

@@ -10,13 +10,13 @@ namespace P2PLearningAPI.Interfaces
     public interface UserInterface
     {
         ICollection<User> GetUsers();
-        User GetUser(int id);
-        bool CheckUserExist(int id);
+        User GetUser(long id);
+        bool CheckUserExist(long id);
         bool CheckUserExist(string email);
         User GetUser(string email);
         User CreateUser(User user, string password, UserType userType);
         User UpdateUser(User user, UserType userType);
-        bool DeleteUser(int id);
+        bool DeleteUser(long id);
         bool save();
     }
 }
