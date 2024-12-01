@@ -5,6 +5,6 @@
         public long PostId { get; set; }
         public long QuestionId { get; set; }
         public Question Question { get; set; }
-        public bool IsTheBestAnswer { get; set; } = false;
+        public bool IsBestAnswer { get; set; } = false;
     }
 }

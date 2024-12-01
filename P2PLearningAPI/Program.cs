@@ -19,6 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<UserInterface, UserRepository>();
+builder.Services.AddScoped<IDiscussionInterface, DiscussionRepository>();
+builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
+builder.Services.AddScoped<IPostInterface, PostRepository>();
+builder.Services.AddScoped<IRequestInterface, RequestRepository>();
+builder.Services.AddScoped<IVoteInterface, VoteRepository>();
+
 
 // Define and register the DbContext directly with the connection string
 builder.Services.AddDbContext<P2PLearningDbContext>(options =>

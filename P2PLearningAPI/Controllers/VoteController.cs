@@ -1,0 +1,115 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using P2PLearningAPI.Interfaces;
+using P2PLearningAPI.Models;
+
+namespace P2PLearningAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class VoteController : ControllerBase
+    {
+        private readonly IVoteInterface _voteRepository;
+
+        public VoteController(IVoteInterface voteRepository)
+        {
+            _voteRepository = voteRepository;
+        }
+
+        // GET: api/Vote
+        [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ICollection<Vote>))]
+        public IActionResult GetVotes()
+        {
+            var votes = _voteRepository.GetVotes();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(votes);
+        }
+
+        // GET: api/Vote/{id}
+        [HttpGet("{id}")]
+        [ProducesResponseType(200, Type = typeof(Vote))]
+        [ProducesResponseType(404)]
+        public IActionResult GetVote(long id)
+        {
+            var vote = _voteRepository.GetVote(id);
+            if (vote == null)
+                return NotFound();
+
+            return Ok(vote);
+        }
+
+        // GET: api/Vote/ByPost/{postId}
+        [HttpGet("ByPost/{postId}")]
+        [ProducesResponseType(200, Type = typeof(ICollection<Vote>))]
+        [ProducesResponseType(404)]
+        public IActionResult GetVotesByPost(long postId)
+        {
+            var votes = _voteRepository.GetVotesByPost(postId);
+            if (votes == null || !votes.Any())
+                return NotFound();
+
+            return Ok(votes);
+        }
+
+        // GET: api/Vote/ByUser/{userId}
+        [HttpGet("ByUser/{userId}")]
+        [ProducesResponseType(200, Type = typeof(ICollection<Vote>))]
+        [ProducesResponseType(404)]
+        public IActionResult GetVotesByUser(long userId)
+        {
+            var votes = _voteRepository.GetVotesByUser(userId);
+            if (votes == null || !votes.Any())
+                return NotFound();
+
+            return Ok(votes);
+        }
+
+        // POST: api/Vote
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Vote))]
+        [ProducesResponseType(400)]
+        public IActionResult CreateVote([FromBody] Vote vote)
+        {
+            if (vote == null)
+                return BadRequest("Invalid vote data.");
+
+            var createdVote = _voteRepository.CreateVote(vote);
+            if (createdVote == null)
+                return BadRequest("Unable to create the vote.");
+
+            return CreatedAtAction(nameof(GetVote), new { id = createdVote.Id }, createdVote);
+        }
+
+        // PUT: api/Vote/{id}
+        [HttpPut("{id}")]
+        [ProducesResponseType(200, Type = typeof(Vote))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateVote(long id, [FromBody] VoteType voteType)
+        {
+            if (voteType == null)
+                return BadRequest("Invalid vote type.");
+
+            var success = _voteRepository.UpdateVote(id, voteType);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        // DELETE: api/Vote/{id}
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteVote(long id)
+        {
+            var success = _voteRepository.DeleteVote(id);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+    }
+}
