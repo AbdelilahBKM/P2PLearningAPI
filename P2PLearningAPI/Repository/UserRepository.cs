@@ -52,10 +52,10 @@ namespace P2PLearningAPI.Repository
             switch (userType)
             {
                 case UserType.Scholar:
-                    newUser = new Scholar(user.FirstName, user.LastName, user.Email);
+                    newUser = new Scholar(user.FirstName, user.LastName, user.Email, user.profilePicture, user.Bio);
                     break;
                 case UserType.Administrator:
-                    newUser = new Administrator(user.FirstName, user.LastName, user.Email);
+                    newUser = new Administrator(user.FirstName, user.LastName, user.Email, user.profilePicture, user.Bio);
                     break;
                 default:
                     throw new ArgumentException("Invalid user type", nameof(userType));

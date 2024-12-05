@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.Data;
+using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 using P2PLearningAPI.Repository;
@@ -25,9 +26,9 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest(ModelState);
             return Ok(users);
         }
-        [HttpGet]
+        [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
-        public IActionResult GetUser([FromQuery] int id)
+        public IActionResult GetUser(int id)
         {
             var user = userRepository.GetUser(id);
             if (user == null) return NotFound();
@@ -39,24 +40,36 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(201, Type = typeof(User))] // User Exist
         [ProducesResponseType(400)] // User doesn't exist
         public IActionResult CreateUser(
-            [FromBody] User user,
-            [FromBody] string password,
-            [FromQuery] UserType userType)
+            [FromBody] UserDTO userDTO)
         {
-            if (user == null || string.IsNullOrWhiteSpace(password))
+            // Validate the userDTO values.
+            if (userDTO == null 
+                || string.IsNullOrWhiteSpace(userDTO.FirstName)
+                || string.IsNullOrWhiteSpace(userDTO.LastName)
+                || string.IsNullOrWhiteSpace(userDTO.Email)
+                || string.IsNullOrWhiteSpace(userDTO.Password)
+                )
             {
                 return BadRequest("User data or password is invalid.");
             }
+
             try
             {
-                var newUser = userRepository.CreateUser(user, password, userType);
+                var newUser = userRepository.CreateUser(new User(
+                    userDTO.FirstName,
+                    userDTO.LastName,
+                    userDTO.Email,
+                    userDTO.ProfilePicture,
+                    userDTO.Bio
+                    ), userDTO.Password, userDTO.UserType);
                 return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
-            } catch (InvalidOperationException ex)
+            }
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
+
 
         //PUT Request
         [HttpPut]
@@ -95,7 +108,5 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-
     }
 }

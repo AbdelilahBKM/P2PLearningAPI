@@ -21,11 +21,13 @@
             public DateTime Created_at { get; set; } = DateTime.Now;
             public DateTime Updated_at { get; set; }
 
-            public User(string fist_name, string last_name, string email)
+            public User(string fist_name, string last_name, string email, string? profile_pic = null, string? bio = null)
             {
                 this.FirstName = fist_name;
                 this.LastName = last_name;
                 this.Email = email;
+                this.profilePicture = profile_pic;
+                this.Bio = bio;
             }
         }
 
