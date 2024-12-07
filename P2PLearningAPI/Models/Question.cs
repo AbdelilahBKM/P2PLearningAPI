@@ -5,6 +5,7 @@
         public Discussion Discussion { get; set; } = null!;
         public long DiscussionId { get; set; }
         public ICollection<Answer> Answers { get; } = new List<Answer>();
+        public Question() { }
         public Question(
             string Title, 
             string Content, 

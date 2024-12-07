@@ -21,6 +21,7 @@
             public DateTime Created_at { get; set; } = DateTime.Now;
             public DateTime Updated_at { get; set; }
 
+            public User() { }
             public User(string fist_name, string last_name, string email, string? profile_pic = null, string? bio = null)
             {
                 this.FirstName = fist_name;

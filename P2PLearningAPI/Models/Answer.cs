@@ -6,6 +6,7 @@
         public long QuestionId { get; set; }
         public Question Question { get; set; }
         public bool IsBestAnswer { get; set; } = false;
+        public Answer() { }
         public Answer(
             string Title,
             string Content,

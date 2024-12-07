@@ -16,6 +16,7 @@ namespace P2PLearningAPI.Models
         public User PostedBy { get; set; } = null!;
         public bool IsClosed { get; set; } = false;
         public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
+        public Post() { }
         public Post(string Title, string Content, User PostedBy) {
             this.Title = Title;
             this.Content = Content;

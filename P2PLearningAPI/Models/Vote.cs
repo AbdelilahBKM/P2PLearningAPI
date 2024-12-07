@@ -13,7 +13,7 @@
         public long PostId { get; set; }
         public Post Post { get; set; } = null!;
         public VoteType VoteType { get; set; }
-
+        public Vote() { }
         public Vote(User user, Post post, VoteType voteType) { 
             this.User = user;
             this.UserId = user.Id;
