@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace P2PLearningAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialModels : Migration
+    public partial class UpdatedModels : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,30 +27,14 @@ namespace P2PLearningAPI.Migrations
                     Last_Login = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserType = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
+                    token = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Number_of_request = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Administrators",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    token = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Administrators", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Administrators_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -79,44 +63,23 @@ namespace P2PLearningAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Posts",
+                name: "Requests",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsUpdated = table.Column<bool>(type: "bit", nullable: false),
-                    Reputation = table.Column<long>(type: "bigint", nullable: false),
-                    PostedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserID = table.Column<long>(type: "bigint", nullable: false),
+                    Topic = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Date_of_request = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
                     IsClosed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Posts", x => x.Id);
+                    table.PrimaryKey("PK_Requests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Scholars",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Number_of_request = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Scholars", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Scholars_Users_UserId",
+                        name: "FK_Requests_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id");
@@ -148,26 +111,42 @@ namespace P2PLearningAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Questions",
+                name: "Posts",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PostId = table.Column<long>(type: "bigint", nullable: false),
-                    DiscussionId = table.Column<long>(type: "bigint", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsUpdated = table.Column<bool>(type: "bit", nullable: false),
+                    Reputation = table.Column<long>(type: "bigint", nullable: false),
+                    PostedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserID = table.Column<long>(type: "bigint", nullable: false),
+                    IsClosed = table.Column<bool>(type: "bit", nullable: false),
+                    PostType = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    PostId = table.Column<long>(type: "bigint", nullable: true),
+                    QuestionId = table.Column<long>(type: "bigint", nullable: true),
+                    IsTheBestAnswer = table.Column<bool>(type: "bit", nullable: true),
+                    DiscussionId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_Discussions_DiscussionId",
+                        name: "FK_Posts_Discussions_DiscussionId",
                         column: x => x.DiscussionId,
                         principalTable: "Discussions",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Questions_Posts_PostId",
-                        column: x => x.PostId,
+                        name: "FK_Posts_Posts_QuestionId",
+                        column: x => x.QuestionId,
                         principalTable: "Posts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Posts_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "Users",
                         principalColumn: "Id");
                 });
 
@@ -196,69 +175,6 @@ namespace P2PLearningAPI.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Requests",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Topic = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Date_of_request = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    IsClosed = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Requests_Scholars_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Scholars",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Answers",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PostId = table.Column<long>(type: "bigint", nullable: false),
-                    QuestionId = table.Column<long>(type: "bigint", nullable: false),
-                    IsTheBestAnswer = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Answers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Answers_Posts_PostId",
-                        column: x => x.PostId,
-                        principalTable: "Posts",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Answers_Questions_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "Questions",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Administrators_UserId",
-                table: "Administrators",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_PostId",
-                table: "Answers",
-                column: "PostId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_QuestionId",
-                table: "Answers",
-                column: "QuestionId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_Discussions_OwnerId",
                 table: "Discussions",
@@ -275,28 +191,23 @@ namespace P2PLearningAPI.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Posts_DiscussionId",
+                table: "Posts",
+                column: "DiscussionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Posts_QuestionId",
+                table: "Posts",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_UserID",
                 table: "Posts",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_DiscussionId",
-                table: "Questions",
-                column: "DiscussionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Questions_PostId",
-                table: "Questions",
-                column: "PostId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Requests_UserId",
                 table: "Requests",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Scholars_UserId",
-                table: "Scholars",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -314,12 +225,6 @@ namespace P2PLearningAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Administrators");
-
-            migrationBuilder.DropTable(
-                name: "Answers");
-
-            migrationBuilder.DropTable(
                 name: "Joinings");
 
             migrationBuilder.DropTable(
@@ -329,16 +234,10 @@ namespace P2PLearningAPI.Migrations
                 name: "Votes");
 
             migrationBuilder.DropTable(
-                name: "Questions");
-
-            migrationBuilder.DropTable(
-                name: "Scholars");
+                name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "Discussions");
-
-            migrationBuilder.DropTable(
-                name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "Users");

@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using P2PLearningAPI.Models;
 using DotNetEnv;
+using P2PLearningAPI.Data;
+using P2PLearningAPI.Interfaces;
+using P2PLearningAPI.Repository;
+using P2PLearningAPI.Models;
 
 // b- Load environment variables from .env file
 DotNetEnv.Env.Load();
@@ -16,6 +19,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddScoped<UserInterface, UserRepository>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IDiscussionInterface, DiscussionRepository>();
+builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
+builder.Services.AddScoped<IPostInterface, PostRepository>();
+builder.Services.AddScoped<IRequestInterface, RequestRepository>();
+builder.Services.AddScoped<IVoteInterface, VoteRepository>();
+
 
 // Define and register the DbContext directly with the connection string
 builder.Services.AddDbContext<P2PLearningDbContext>(options =>

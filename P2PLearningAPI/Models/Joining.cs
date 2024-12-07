@@ -8,5 +8,14 @@
         public long DiscussionId { get; set; }
         public Discussion Discussion { get; set; } = null!;
         public DateTime JoinedAt { get; set; } = DateTime.Now;
+        public Joining() { }
+        public Joining(User user, Discussion discussion)
+        {
+            this.User = user;
+            this.UserId = user.Id;
+            this.Discussion = discussion;
+            this.DiscussionId = discussion.Id;
+
+        }
     }
 }

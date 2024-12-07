@@ -1,12 +1,20 @@
 ﻿namespace P2PLearningAPI.Models
 {
-    public class Answer
+    public class Answer: Post
     {
-        public long Id { get; set; }
-        public Post Post { get; set; } = null!;
         public long PostId { get; set; }
         public long QuestionId { get; set; }
         public Question Question { get; set; }
-        public bool IsTheBestAnswer { get; set; } = false;
+        public bool IsBestAnswer { get; set; } = false;
+        public Answer() { }
+        public Answer(
+            string Title,
+            string Content,
+            User PostedBy,
+            Question Question
+            ): base(Title, Content, PostedBy) {
+            this.Question = Question;
+            this.QuestionId = Question.Id;
+        }
     }
 }
