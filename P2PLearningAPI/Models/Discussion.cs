@@ -14,5 +14,12 @@
         public ICollection<Question> Questions { get; set; } = new List<Question>();
         public ICollection<Joining> Joinings { get; set; } = new HashSet<Joining>();
 
+        public Discussion(User user,string D_Name, string? D_Profile = null) { 
+            this.Owner = user;
+            this.D_Name = D_Name;
+            this.D_Profile = D_Profile;
+            this.OwnerId = user.Id;
+        }
+
     }
 }

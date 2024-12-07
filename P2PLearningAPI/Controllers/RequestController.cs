@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -57,16 +58,30 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Request))]
         [ProducesResponseType(400)]
-        public IActionResult CreateRequest([FromBody] Request request)
+        public IActionResult CreateRequest([FromBody] RequestDTO request)
         {
             if (request == null)
                 return BadRequest("Invalid request data.");
+            if(request.User == null)
+                return BadRequest("Invalid User data.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            try
+            {
 
-            var createdRequest = _requestRepository.CreateRequest(request);
+            var createdRequest = _requestRepository.CreateRequest(
+                new Request(
+                    request.Topic, 
+                    request.Description,
+                    request.User
+                    )
+                );
             return CreatedAtAction(nameof(GetRequest), new { id = createdRequest.Id }, createdRequest);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT: api/Request

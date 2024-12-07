@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -57,16 +58,19 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Post))]
         [ProducesResponseType(400)]
-        public IActionResult CreatePost([FromBody] Post post)
+        public IActionResult CreatePost([FromBody] PostDTO postDTO, [FromQuery] PostType postType)
         {
-            if (post == null)
+            if (postDTO == null)
                 return BadRequest("Invalid post data.");
-
-            var createdPost = _postRepository.CreatePost(post);
-            if (createdPost == null)
-                return BadRequest("Unable to create the post.");
-
-            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
+            try
+            {
+                var createdPost = _postRepository.CreatePost(postDTO, postType);
+                return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT: api/Post
@@ -112,17 +116,29 @@ namespace P2PLearningAPI.Controllers
             return NoContent();
         }
 
-        // PUT: api/Post/Vote/{postId}/{userId}/{voteValue}
-        [HttpPut("Vote/{postId}/{userId}/{voteValue}")]
+        // PUT: api/Post/Vote/{postId}/
+        [HttpPut("Vote/{postId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult VoteOnPost(long postId, long userId, int voteValue)
+        public IActionResult VoteOnPost(long postId, [FromBody] Vote vote)
         {
-            if (voteValue < 1 || voteValue > 5)  // Assuming a vote range from 1 to 5
-                return BadRequest("Invalid vote value.");
+            
+            var success = _postRepository.VoteOnPost(postId, vote);
+            if (!success)
+                return NotFound();
 
-            var success = _postRepository.VoteOnPost(postId, userId, voteValue);
+            return NoContent(); 
+        }
+        // PUT: api/Post/Vote/{postId}/
+        [HttpPut("Vote/remove/{postId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteVote(long postId, [FromBody] Vote vote)
+        {
+
+            var success = _postRepository.DeleteVote(postId, vote);
             if (!success)
                 return NotFound();
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -70,16 +71,26 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Joining))]
         [ProducesResponseType(400)]
-        public IActionResult CreateJoining([FromBody] Joining joining)
+        public IActionResult CreateJoining([FromBody] JoiningDTO joining)
         {
             if (joining == null)
                 return BadRequest("Invalid joining data.");
+            try
+            {
 
-            var createdJoining = _joiningRepository.CreateJoining(joining);
-            if (createdJoining == null)
-                return BadRequest("Unable to create the joining.");
+                var createdJoining = _joiningRepository.CreateJoining(
+                    new Joining(
+                        joining.User,
+                        joining.Discussion
+                        )
+                    );
 
-            return CreatedAtAction(nameof(GetJoining), new { id = createdJoining.Id }, createdJoining);
+                return CreatedAtAction(nameof(GetJoining), new { id = createdJoining.Id }, createdJoining);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Joining/{id}
@@ -88,11 +99,19 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteJoining(long id)
         {
-            var success = _joiningRepository.DeleteJoining(id);
-            if (!success)
-                return NotFound();
+            try
+            {
 
-            return NoContent();
+                var success = _joiningRepository.DeleteJoining(id);
+                if (!success)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

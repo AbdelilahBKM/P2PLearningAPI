@@ -14,15 +14,12 @@
         public Post Post { get; set; } = null!;
         public VoteType VoteType { get; set; }
 
-
-        public void UpVote()
-        {
-            this.VoteType = VoteType.Positive;
-        }
-
-        public void DownVote()
-        {
-            this.VoteType = VoteType.Negative;
+        public Vote(User user, Post post, VoteType voteType) { 
+            this.User = user;
+            this.UserId = user.Id;
+            this.Post = post;
+            this.PostId = post.Id;
+            this.VoteType = voteType;
         }
     }
 }

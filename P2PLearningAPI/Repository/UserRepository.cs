@@ -85,6 +85,7 @@ namespace P2PLearningAPI.Repository
             updateUser.Email = user.Email;
             updateUser.FirstName = user.FirstName;
             updateUser.LastName = user.LastName;
+            updateUser.profilePicture = user.profilePicture;
             context.Users.Update(updateUser);
             if(save()) return updateUser;
             throw new InvalidOperationException("Failed to update the user to the database.");

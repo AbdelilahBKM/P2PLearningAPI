@@ -46,7 +46,11 @@ namespace P2PLearningAPI.Repository
         {
             if (joining == null)
                 throw new ArgumentNullException(nameof(joining));
-
+            Joining test = _context.Joinings.Where(j => 
+            (j.UserId == joining.UserId && j.DiscussionId == joining.DiscussionId)
+                ).First();
+            if (test != null)
+                throw new InvalidOperationException("Joining already exist");
             _context.Joinings.Add(joining);
             if (Save())
                 return joining;

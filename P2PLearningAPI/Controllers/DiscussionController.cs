@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
+using P2PLearningAPI.DTOs;
 
 namespace P2PLearningAPI.Controllers
 {
@@ -60,15 +61,20 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Discussion))]
         [ProducesResponseType(400)]
-        public IActionResult CreateDiscussion([FromBody] Discussion discussion)
+        public IActionResult CreateDiscussion([FromBody] DiscussionDTO discussionDTO)
         {
-            if (discussion == null)
+            if (discussionDTO == null)
                 return BadRequest("Invalid discussion data.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdDiscussion = _discussionRepository.CreateDiscussion(discussion);
+            var createdDiscussion = _discussionRepository.CreateDiscussion(
+                new Discussion(
+                    discussionDTO.Owner,
+                    discussionDTO.d_Name,
+                    discussionDTO.d_Profile
+                    ));
             return CreatedAtAction(nameof(GetDiscussion), new { id = createdDiscussion.Id }, createdDiscussion);
         }
 

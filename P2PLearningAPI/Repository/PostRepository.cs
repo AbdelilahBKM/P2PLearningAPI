@@ -1,4 +1,5 @@
 ﻿using P2PLearningAPI.Data;
+using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -22,7 +23,7 @@ namespace P2PLearningAPI.Repository
         // Get a single post by ID
         public Post GetPost(long id)
         {
-            return _context.Posts.FirstOrDefault(p => p.Id == id);
+            return _context.Posts.FirstOrDefault(p => p.Id == id)!;
         }
 
         // Get posts by user ID
@@ -38,19 +39,43 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(Post post)
+        public Post CreatePost(PostDTO postDTO, PostType postType)
         {
-            _context.Posts.Add(post);
-            Save();
-            return post;
+            if (postDTO == null) 
+                throw new ArgumentNullException(nameof(postDTO));
+            Post newPost;
+            switch (postType)
+            {
+                case PostType.Question:
+                    if(postDTO.Discussion == null)
+                        throw new ArgumentNullException(nameof(postDTO.Discussion));
+                        newPost = new Question(postDTO.Title, postDTO.Content,postDTO.PostedBy, postDTO.Discussion);
+                    break;
+                case PostType.Answer:
+                    if (postDTO.Question == null)
+                        throw new ArgumentException(nameof(postDTO.Question));
+                    newPost = new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Question);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid post type", nameof(postType));
+            }
+            _context.Posts.Add(newPost);
+            if(Save())
+                return newPost;
+            throw new InvalidOperationException("Failed to save the Post to the database.");
         }
 
         // Update an existing post
         public Post UpdatePost(Post post)
         {
+            if(post == null)
+                throw new ArgumentNullException(nameof(post));
+            if (!CheckPostExist(post.Id))
+                throw new InvalidOperationException("Post doesn't exist");
             _context.Posts.Update(post);
-            Save();
-            return post;
+            if(Save())
+                return post;
+            throw new InvalidOperationException("Failed to update Post  to the database");
         }
 
         // Close a post by setting IsClosed to true
@@ -61,8 +86,8 @@ namespace P2PLearningAPI.Repository
                 return false;
 
             post.IsClosed = true;
-            Save();
-            return true;
+            return Save();
+            
         }
 
         // Reopen a post by setting IsClosed to false
@@ -73,20 +98,26 @@ namespace P2PLearningAPI.Repository
                 return false;
 
             post.IsClosed = false;
-            Save();
-            return true;
+            return Save();
         }
 
         // Vote on a post (adjust Reputation)
-        public bool VoteOnPost(long postId, long userId, int voteValue)
+        public bool VoteOnPost(long postId, Vote vote)
         {
             var post = GetPost(postId);
             if (post == null)
                 return false;
 
-            post.Reputation += voteValue;
-            Save();
-            return true;
+            post.AddVote(vote);
+            return Save();
+        }
+        public bool DeleteVote(long postId, Vote vote)
+        {
+            var post = GetPost(postId);
+            if(post == null)
+                return false;
+            post.RemoveVote(vote);
+            return Save();
         }
 
         // Delete a post by ID

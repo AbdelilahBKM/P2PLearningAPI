@@ -38,10 +38,17 @@ namespace P2PLearningAPI.Repository
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-
-            _context.Requests.Add(request);
-            Save();
-            return request;
+            Scholar user = _context.Scholars.Where(u => u.Id == request.Id).First();
+            if (user == null)
+                throw new InvalidOperationException("User does not exist");
+            if (user.AddRequest(request))
+            {
+                _context.Requests.Add(request);
+                if(Save())
+                    return request;
+                throw new InvalidOperationException("Failed to save the Request to the database");
+            }
+            throw new InvalidOperationException("User unable to Create Requests");
         }
 
         public Request UpdateRequest(Request request)
@@ -60,7 +67,7 @@ namespace P2PLearningAPI.Repository
             if (request == null)
                 return false;
 
-            request.IsApproved = true;
+            request.ApproveRequest();
             _context.Requests.Update(request);
             return Save();
         }
@@ -71,7 +78,7 @@ namespace P2PLearningAPI.Repository
             if (request == null)
                 return false;
 
-            request.IsClosed = true;
+            request.CloseRequest();
             _context.Requests.Update(request);
             return Save();
         }

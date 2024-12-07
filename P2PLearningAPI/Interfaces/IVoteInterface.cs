@@ -10,7 +10,6 @@ namespace P2PLearningAPI.Interfaces
         ICollection<Vote> GetVotesByPost(long postId);
         ICollection<Vote> GetVotesByUser(long userId);
         Vote CreateVote(Vote vote);
-        bool UpdateVote(long id, VoteType voteType);  // Return type should be bool
         bool DeleteVote(long id);
         bool Save();
     }

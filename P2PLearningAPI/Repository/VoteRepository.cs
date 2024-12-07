@@ -45,19 +45,9 @@ namespace P2PLearningAPI.Repository
                 throw new ArgumentNullException(nameof(vote));
 
             _context.Votes.Add(vote);
-            Save();
-            return vote;
-        }
-
-        public bool UpdateVote(long id, VoteType voteType)
-        {
-            var vote = GetVote(id);
-            if (vote == null)
-                return false;
-
-            vote.VoteType = voteType;
-            _context.Votes.Update(vote);
-            return Save();
+            if(Save())
+                return vote;
+            throw new InvalidOperationException("unable to create vote");
         }
 
         public bool DeleteVote(long id)
