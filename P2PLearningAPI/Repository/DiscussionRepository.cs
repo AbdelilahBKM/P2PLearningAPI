@@ -45,7 +45,7 @@ namespace P2PLearningAPI.Repository
             return discussion?.Questions.ToList() ?? new List<Question>();
         }
 
-        public ICollection<Discussion> GetDiscussionsByOwner(long ownerId)
+        public ICollection<Discussion> GetDiscussionsByOwner(string ownerId)
         {
             return context.Discussions
                           .Where(d => d.OwnerId == ownerId)

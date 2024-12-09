@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PLearningAPI.Models;
-using System.Reflection.Metadata;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace P2PLearningAPI.Data
 {
-    public class P2PLearningDbContext : DbContext
+    public class P2PLearningDbContext : IdentityDbContext<User>
     {
         public P2PLearningDbContext(DbContextOptions<P2PLearningDbContext> options) : base(options) {}
         public DbSet<User> Users { get; set; }
@@ -19,6 +19,7 @@ namespace P2PLearningAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             //==> Primary keys
             modelBuilder.Entity<User>().HasKey(x => x.Id);
             modelBuilder.Entity<Request>().HasKey(x => x.Id);

@@ -4,6 +4,8 @@ using P2PLearningAPI.Data;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Repository;
 using P2PLearningAPI.Models;
+using Microsoft.AspNetCore.Identity;
+using P2PLearningAPI.Extensions;
 
 // b- Load environment variables from .env file
 DotNetEnv.Env.Load();
@@ -18,6 +20,11 @@ Console.WriteLine($"Server Name: {serverName}, Database Name: {dbName}, Connecti
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+builder.Services.AddIdentityCore<User>()
+    .AddEntityFrameworkStores<P2PLearningDbContext>()
+    .AddApiEndpoints();
 builder.Services.AddControllers();
 builder.Services.AddScoped<UserInterface, UserRepository>();
 builder.Services.AddScoped<UserService>();
@@ -44,9 +51,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.ApplyMigrations();
 }
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapIdentityApi<User>();
 app.Run();

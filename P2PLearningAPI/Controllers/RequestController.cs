@@ -45,7 +45,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Request>))]
         [ProducesResponseType(404)]
-        public IActionResult GetRequestsByUser(long userId)
+        public IActionResult GetRequestsByUser(string userId)
         {
             var requests = _requestRepository.GetRequestsByUser(userId);
             if (requests == null || !ModelState.IsValid)

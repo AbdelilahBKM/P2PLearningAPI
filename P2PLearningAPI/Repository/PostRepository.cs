@@ -27,7 +27,7 @@ namespace P2PLearningAPI.Repository
         }
 
         // Get posts by user ID
-        public ICollection<Post> GetPostsByUser(long userId)
+        public ICollection<Post> GetPostsByUser(string userId)
         {
             return _context.Posts.Where(p => p.UserID == userId).ToList();
         }

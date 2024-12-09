@@ -19,20 +19,20 @@ namespace P2PLearningAPI.Repository
         {
             return context.Users.OrderBy(u => u.Id).ToList();
         }
-        public User GetUser(long id)
+        public User GetUser(string id)
         {
-            return context.Users.Where(u => u.Id == id).FirstOrDefault();
+            return context.Users.Where(u => u.Id == id).FirstOrDefault()!;
         }
-        public User GetUser(string email)
+        public User GetUserByEmail(string email)
         {
-            return context.Users.Where(u => u.Email == email).FirstOrDefault();
+            return context.Users.Where(u => u.Email == email).FirstOrDefault()!;
         }
 
-        public bool CheckUserExist(long id)
+        public bool CheckUserExist(string id)
         {
             return context.Users.Any(u => u.Id == id);
         }
-        public bool CheckUserExist(string email)
+        public bool CheckUserExistByEmail(string email)
         {
             return context.Users.Any(u => email == u.Email);
         }
@@ -44,7 +44,7 @@ namespace P2PLearningAPI.Repository
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password cannot be null or empty", nameof(password));
 
-            if (CheckUserExist(user.Email))
+            if (CheckUserExist(user.Email!))
                 throw new InvalidOperationException("A user with this email already exists.");
 
             User newUser;
@@ -52,10 +52,10 @@ namespace P2PLearningAPI.Repository
             switch (userType)
             {
                 case UserType.Scholar:
-                    newUser = new Scholar(user.FirstName, user.LastName, user.Email, user.profilePicture, user.Bio);
+                    newUser = new Scholar(user.FirstName, user.LastName, user.Email!, user.profilePicture, user.Bio);
                     break;
                 case UserType.Administrator:
-                    newUser = new Administrator(user.FirstName, user.LastName, user.Email, user.profilePicture, user.Bio);
+                    newUser = new Administrator(user.FirstName, user.LastName, user.Email!, user.profilePicture, user.Bio);
                     break;
                 default:
                     throw new ArgumentException("Invalid user type", nameof(userType));
@@ -92,7 +92,7 @@ namespace P2PLearningAPI.Repository
             
         }
 
-        public bool DeleteUser(long id)
+        public bool DeleteUser(string id)
         {
             User user = GetUser(id);
             if (user == null)

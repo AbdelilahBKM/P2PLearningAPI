@@ -30,7 +30,7 @@ namespace P2PLearningAPI.Repository
         }
 
         // Get joinings by userId
-        public ICollection<Joining> GetJoiningsByUser(long userId)
+        public ICollection<Joining> GetJoiningsByUser(string userId)
         {
             return _context.Joinings.Where(j => j.UserId == userId).ToList();
         }

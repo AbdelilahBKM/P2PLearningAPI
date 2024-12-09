@@ -13,7 +13,7 @@ namespace P2PLearningAPI.Interfaces
         ICollection<Post> GetPosts();
         Post GetPost(long id);
         bool CheckPostExist(long id);
-        ICollection<Post> GetPostsByUser(long userId);
+        ICollection<Post> GetPostsByUser(string userId);
         Post CreatePost(PostDTO post, PostType postType);
         Post UpdatePost(Post post);
         bool DeletePost(long id);

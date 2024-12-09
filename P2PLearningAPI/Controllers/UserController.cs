@@ -28,7 +28,7 @@ namespace P2PLearningAPI.Controllers
         }
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
-        public IActionResult GetUser(int id)
+        public IActionResult GetUser(string id)
         {
             var user = userRepository.GetUser(id);
             if (user == null) return NotFound();
@@ -93,7 +93,7 @@ namespace P2PLearningAPI.Controllers
         [HttpDelete]
         [ProducesResponseType(204)] // sucess
         [ProducesResponseType(404)] // Not Found
-        public IActionResult DeleteUser([FromQuery] long Id)
+        public IActionResult DeleteUser([FromQuery] string Id)
         {
             try
             {

@@ -48,7 +48,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByOwner/{ownerId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Discussion>))]
         [ProducesResponseType(404)]
-        public IActionResult GetDiscussionsByOwner(long ownerId)
+        public IActionResult GetDiscussionsByOwner(string ownerId)
         {
             var discussions = _discussionRepository.GetDiscussionsByOwner(ownerId);
             if (discussions == null || !ModelState.IsValid)

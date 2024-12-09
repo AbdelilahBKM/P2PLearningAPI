@@ -45,7 +45,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Joining>))]
         [ProducesResponseType(404)]
-        public IActionResult GetJoiningsByUser(long userId)
+        public IActionResult GetJoiningsByUser(string userId)
         {
             var joinings = _joiningRepository.GetJoiningsByUser(userId);
             if (joinings == null || !joinings.Any())

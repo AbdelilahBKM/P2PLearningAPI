@@ -45,7 +45,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Post>))]
         [ProducesResponseType(404)]
-        public IActionResult GetPostsByUser(long userId)
+        public IActionResult GetPostsByUser(string userId)
         {
             var posts = _postRepository.GetPostsByUser(userId);
             if (posts == null || !posts.Any())

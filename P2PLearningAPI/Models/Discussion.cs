@@ -8,7 +8,7 @@
         public int Number_of_members { get; set; } = 0;
         public int Number_of_active_members { get; set; } = 0;
         public int Number_of_posts { get; set; } = 0;
-        public long OwnerId { get; set; }
+        public string OwnerId { get; set; }
         public User Owner { get; set; } = null!;
         public bool IsDeleted { get; set; } = false;
         public ICollection<Question> Questions { get; set; } = new List<Question>();

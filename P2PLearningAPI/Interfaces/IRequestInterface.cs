@@ -7,7 +7,7 @@ namespace P2PLearningAPI.Interfaces
         ICollection<Request> GetRequests();
         Request GetRequest(long id);
         bool CheckRequestExist(long id);
-        ICollection<Request> GetRequestsByUser(long userId);
+        ICollection<Request> GetRequestsByUser(string userId);
         Request CreateRequest(Request request);
         Request UpdateRequest(Request request);
         bool ApproveRequest(long id);

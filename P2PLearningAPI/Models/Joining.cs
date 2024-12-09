@@ -3,7 +3,7 @@
     public class Joining
     {
         public long Id { get; set; }
-        public long UserId {  get; set; }
+        public string UserId {  get; set; }
         public User User { get; set; } = null!;
         public long DiscussionId { get; set; }
         public Discussion Discussion { get; set; } = null!;
