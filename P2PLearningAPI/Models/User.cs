@@ -1,46 +1,38 @@
-﻿    using Microsoft.AspNetCore.Identity;
-    using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.SqlServer.Server;
+using System;
+using System.Collections.Generic;
 
-    namespace P2PLearningAPI.Models
+namespace P2PLearningAPI.Models
+{
+    public enum UserType { Scholar, Administrator }
+    public class User : IdentityUser
     {
-        public class User: IdentityUser
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string? ProfilePicture { get; set; } 
+        public string? Bio { get; set; }
+        public bool IsActive { get; set; }
+        public UserType UserType { get; set; }
+        public int? numberOfRequests { get; set; }
+        public ICollection<Joining> Joinings { get; } = new HashSet<Joining>();
+        public ICollection<Post> Posts { get; } = new HashSet<Post>();
+        public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
+        public ICollection<Request> Requests { get; } = new HashSet<Request>();
+        public DateTime Last_Login { get; set; }
+        public bool AccountDeleted { get; set; } = false;
+        public DateTime Created_at { get; set; } = DateTime.Now;
+        public DateTime Updated_at { get; set; } = DateTime.Now; 
+
+        public bool AddRequest(Request request)
         {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public string profilePicture { get; set; }
-            public string Bio {  get; set; }
-            public bool IsActive { get; set; }
-            public ICollection<Joining> Joinings { get; } = new HashSet<Joining>();
-            public ICollection<Post> Posts { get; } = new HashSet<Post>();
-            public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
-            public DateTime Last_Login { get; set; }
-            public bool AccountDeleted { get; set; } = false;
-            public DateTime Created_at { get; set; } = DateTime.Now;
-            public DateTime Updated_at { get; set; }
-
-            public User() { }
-            public User(string fist_name, string last_name, string email, string? profile_pic = null, string? bio = null)
+            if(numberOfRequests < 15)
             {
-                this.FirstName = fist_name;
-                this.LastName = last_name;
-                this.Email = email;
-                this.profilePicture = profile_pic;
-                this.Bio = bio;
+                Requests.Add(request);
+                numberOfRequests++;
+                return true;
             }
-        }
-
-        public class UserService
-        {
-            private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
-            public void RegisterUser(User user, string password)
-            {
-                user.PasswordHash = _passwordHasher.HashPassword(user, password);
-            }
-
-            public bool VerifyPassword(User user, string attempt)
-            {
-                var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, attempt);
-                return result == PasswordVerificationResult.Success;
-            }
+            return false;
         }
     }
+}

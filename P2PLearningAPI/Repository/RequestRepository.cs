@@ -38,7 +38,7 @@ namespace P2PLearningAPI.Repository
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            Scholar user = _context.Scholars.Where(u => u.Id == request.UserId).First();
+            User user = _context.Users.Where(u => u.Id == request.UserId).First();
             if (user == null)
                 throw new InvalidOperationException("User does not exist");
             if (user.AddRequest(request))

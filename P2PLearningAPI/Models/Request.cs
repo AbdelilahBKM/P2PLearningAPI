@@ -6,7 +6,7 @@
         public string Topic { get; set; }
         public string Description { get; set; }
         public string  UserId { get; set; }
-        public Scholar User { get; set; } = null!;
+        public User User { get; set; } = null!;
         public DateTime Date_of_request { get; set; }
         public bool IsApproved { get; set; } = false;
         public bool IsClosed { get; set; } = false;
@@ -15,7 +15,7 @@
         {
             this.Topic = Topic;
             this.Description = Description;
-            this.User = (Scholar)User;
+            this.User = User;
             UserId = User.Id;
             Date_of_request = DateTime.Now;
         }

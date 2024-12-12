@@ -6,11 +6,14 @@ using P2PLearningAPI.Repository;
 using P2PLearningAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using P2PLearningAPI.Extensions;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
-// b- Load environment variables from .env file
+
 DotNetEnv.Env.Load();
 
-// Retrieve the connection string components from the environment variables
 var serverName = Environment.GetEnvironmentVariable("SQL_SERVER_NAME");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var connectionString = $"Server={serverName};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;";
@@ -23,17 +26,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
 builder.Services.AddIdentityCore<User>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<P2PLearningDbContext>()
     .AddApiEndpoints();
 builder.Services.AddControllers();
-builder.Services.AddScoped<UserInterface, UserRepository>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserIdentity, UserIdentiyRepository>();
+//builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IDiscussionInterface, DiscussionRepository>();
 builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
 builder.Services.AddScoped<IPostInterface, PostRepository>();
 builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 
+// JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+        };
+    });
 
 // Define and register the DbContext directly with the connection string
 builder.Services.AddDbContext<P2PLearningDbContext>(options =>
@@ -55,7 +78,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapIdentityApi<User>();
+//app.MapIdentityApi<User>();
 app.Run();

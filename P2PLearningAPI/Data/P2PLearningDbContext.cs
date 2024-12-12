@@ -6,9 +6,7 @@ namespace P2PLearningAPI.Data
     public class P2PLearningDbContext : IdentityDbContext<User>
     {
         public P2PLearningDbContext(DbContextOptions<P2PLearningDbContext> options) : base(options) {}
-        public DbSet<User> Users { get; set; }
-        public DbSet<Scholar> Scholars { get; set; }
-        public DbSet<Administrator> Administrators { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Joining> Joinings { get; set; }
@@ -30,16 +28,10 @@ namespace P2PLearningAPI.Data
 
             //==> Constraints
 
-            // User => Admin & Scholar
-            modelBuilder.Entity<User>()
-                .HasDiscriminator<String>("UserType")
-                .HasValue<Scholar>("Scholar")
-                .HasValue<Administrator>("Administrator");
-               
 
             // Scholar has many requests
-            modelBuilder.Entity<Scholar>()
-                .HasMany(s => s.Requests)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Requests)
                 .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId)
                 .IsRequired()

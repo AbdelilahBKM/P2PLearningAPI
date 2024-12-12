@@ -4,7 +4,7 @@ namespace P2PLearningAPI.DTOs
 {
     public class JoiningDTO
     {
-        public User User { get; set; }
-        public Discussion Discussion { get; set; }
+        public required User User { get; set; }
+        public required Discussion Discussion { get; set; }
     }
 }

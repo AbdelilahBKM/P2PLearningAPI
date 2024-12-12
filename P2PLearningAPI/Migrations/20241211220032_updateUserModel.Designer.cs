@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PLearningAPI.Data;
 
@@ -11,9 +12,11 @@ using P2PLearningAPI.Data;
 namespace P2PLearningAPI.Migrations
 {
     [DbContext(typeof(P2PLearningDbContext))]
-    partial class P2PLearningDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211220032_updateUserModel")]
+    partial class updateUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -389,11 +392,10 @@ namespace P2PLearningAPI.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int>("UserType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("numberOfRequests")
-                        .HasColumnType("int");
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.HasKey("Id");
 
@@ -406,6 +408,10 @@ namespace P2PLearningAPI.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("UserType").HasValue("User");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("P2PLearningAPI.Models.Vote", b =>
@@ -463,6 +469,27 @@ namespace P2PLearningAPI.Migrations
                     b.HasIndex("DiscussionId");
 
                     b.HasDiscriminator().HasValue("Question");
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.Administrator", b =>
+                {
+                    b.HasBaseType("P2PLearningAPI.Models.User");
+
+                    b.Property<string>("token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("Administrator");
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.Scholar", b =>
+                {
+                    b.HasBaseType("P2PLearningAPI.Models.User");
+
+                    b.Property<int>("Number_of_request")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("Scholar");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -559,7 +586,7 @@ namespace P2PLearningAPI.Migrations
 
             modelBuilder.Entity("P2PLearningAPI.Models.Request", b =>
                 {
-                    b.HasOne("P2PLearningAPI.Models.User", "User")
+                    b.HasOne("P2PLearningAPI.Models.Scholar", "User")
                         .WithMany("Requests")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -627,14 +654,17 @@ namespace P2PLearningAPI.Migrations
 
                     b.Navigation("Posts");
 
-                    b.Navigation("Requests");
-
                     b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("P2PLearningAPI.Models.Question", b =>
                 {
                     b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.Scholar", b =>
+                {
+                    b.Navigation("Requests");
                 });
 #pragma warning restore 612, 618
         }
