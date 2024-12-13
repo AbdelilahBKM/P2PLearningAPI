@@ -15,18 +15,18 @@ namespace P2PLearningAPI.Repository
         private readonly P2PLearningDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
         public UserIdentiyRepository(
             P2PLearningDbContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IConfiguration configuration
+            ITokenService tokenService
             )
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
+            _tokenService = tokenService;
         }
         public bool CheckUserExistByEmail(string email)
         {
@@ -38,8 +38,11 @@ namespace P2PLearningAPI.Repository
             return _context.Users.Any(u => u.Id == id);
         }
 
-        public User? GetUser(string id)
+        public User? GetUser(string id, string token)
         {
+            var (UserId, _, _) = _tokenService.DecodeToken(token);
+            if(UserId != id)
+                throw new Exception("Unauthorized Access!");
             return _context.Users.Find(id);
         }
 
@@ -50,13 +53,14 @@ namespace P2PLearningAPI.Repository
 
         public (User user, string token) Login(LoginDTO userDTO)
         {
+            
             var user = _userManager.FindByEmailAsync(userDTO.Email).Result;
             if (user == null)
                 throw new Exception("User Not Found!");
             var result = _signInManager.CheckPasswordSignInAsync(user, userDTO.Password, false).Result;
             if (result.Succeeded)
             {
-                var token = GenerateToken(user);
+                var token = _tokenService.GenerateToken(user);
                 return (user, token);
             }
 
@@ -75,8 +79,11 @@ namespace P2PLearningAPI.Repository
             };
             var result = _userManager.CreateAsync(User, user.Password).Result;
             if (!result.Succeeded)
-                throw new Exception("Unable to create user");
-            var token = GenerateToken(User);
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Unable to create user: {errors}");
+            }
+            var token = _tokenService.GenerateToken(User);
             return (User, token);
         }
 
@@ -94,29 +101,6 @@ namespace P2PLearningAPI.Repository
             return user;
         }
 
-        public string GenerateToken(User user)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                    _configuration["Jwt:SecretKey"]!
-                ));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("UserType", user.UserType.ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        
     }
 }

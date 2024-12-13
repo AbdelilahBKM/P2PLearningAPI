@@ -31,7 +31,7 @@ builder.Services.AddIdentityCore<User>()
     .AddApiEndpoints();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserIdentity, UserIdentiyRepository>();
-//builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ITokenService, TokenServices>();
 builder.Services.AddScoped<IDiscussionInterface, DiscussionRepository>();
 builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
 builder.Services.AddScoped<IPostInterface, PostRepository>();
