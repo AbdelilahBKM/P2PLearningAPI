@@ -4,15 +4,15 @@ namespace P2PLearningAPI.Interfaces
 {
     public interface IRequestInterface
     {
-        ICollection<Request> GetRequests();
-        Request GetRequest(long id);
+        ICollection<Request> GetRequests(string token);
+        Request? GetRequest(long id, string token);
         bool CheckRequestExist(long id);
-        ICollection<Request> GetRequestsByUser(string userId);
-        Request CreateRequest(Request request);
-        Request UpdateRequest(Request request);
-        bool ApproveRequest(long id);
-        bool CloseRequest(long id);
-        bool DeleteRequest(long id);
+        ICollection<Request> GetRequestsByUser(string userId, string token);
+        Request CreateRequest(Request request, string token);
+        Request UpdateRequest(Request request, string token);
+        bool ApproveRequest(long id, string token);
+        bool CloseRequest(long id, string token);
+        bool DeleteRequest(long id, string token);
         bool Save();
     }
 }

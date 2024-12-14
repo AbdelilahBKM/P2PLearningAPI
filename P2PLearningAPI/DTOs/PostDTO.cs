@@ -10,6 +10,7 @@ namespace P2PLearningAPI.DTOs
         public required User PostedBy { get; set; }
         public Discussion? Discussion { get; set; } = null;
         public Question? Question { get; set; } = null;
+        public Answer? Answer { get; set; } = null;
         public PostType PostType { get; set; }
         
     }

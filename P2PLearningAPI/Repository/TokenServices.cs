@@ -33,10 +33,8 @@ namespace P2PLearningAPI.Repository
 
             try
             {
-                // Validate the token and extract claims principal
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
 
-                // Extract claims
                 var userId = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
                 var email = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value;
                 var userType = principal.Claims.FirstOrDefault(c => c.Type == "UserType")?.Value;
@@ -46,7 +44,6 @@ namespace P2PLearningAPI.Repository
                     throw new SecurityTokenException("Invalid token claims.");
                 }
 
-                // Return the extracted user details
                 return (userId, email, userType);
             }
             catch (Exception ex)
@@ -78,6 +75,16 @@ namespace P2PLearningAPI.Repository
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ClaimsPrincipal ValidateRefreshToken(string refreshToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

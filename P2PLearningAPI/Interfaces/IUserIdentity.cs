@@ -6,7 +6,7 @@ namespace P2PLearningAPI.Interfaces
     public interface IUserIdentity
     {
         public ICollection<User> GetUsers();
-        public User? GetUser(string id, string token);
+        public User? GetUser(string id);
         public bool CheckUserExistByEmail(string email);
         public bool CheckUserExistById(string id);
         public (User user, string token) Register(RegisterDTO user);

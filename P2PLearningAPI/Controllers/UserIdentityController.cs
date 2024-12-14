@@ -29,29 +29,16 @@ namespace P2PLearningAPI.Controllers
             return Ok(users);
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
         public IActionResult GetUser(string id)
         {
-            try
-            {
-
-            var authHeader = Request.Headers["Authorization"].ToString();
-            if(string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                return BadRequest("Authorization header is missing or invalid.");
-            var token = authHeader.Substring("Bearer ".Length).Trim();
-            var user = _userIdentityRepository.GetUser(id, token);
+            var user = _userIdentityRepository.GetUser(id);
             if (user == null)
                 return NotFound();
-
             return Ok(user);
-            } catch(Exception e)
-            {
-                return Unauthorized(e.Message);
-            }
         }
 
         [HttpPost("Login")]

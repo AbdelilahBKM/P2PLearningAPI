@@ -38,11 +38,8 @@ namespace P2PLearningAPI.Repository
             return _context.Users.Any(u => u.Id == id);
         }
 
-        public User? GetUser(string id, string token)
+        public User? GetUser(string id)
         {
-            var (UserId, _, _) = _tokenService.DecodeToken(token);
-            if(UserId != id)
-                throw new Exception("Unauthorized Access!");
             return _context.Users.Find(id);
         }
 

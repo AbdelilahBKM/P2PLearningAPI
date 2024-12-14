@@ -8,10 +8,12 @@ namespace P2PLearningAPI.Repository
     public class PostRepository : IPostInterface
     {
         private readonly P2PLearningDbContext _context;
+        private readonly ITokenService _tokenService;
 
-        public PostRepository(P2PLearningDbContext context)
+        public PostRepository(P2PLearningDbContext context, ITokenService tokenService)
         {
             _context = context;
+            _tokenService = tokenService;
         }
 
         // Get all posts
@@ -21,7 +23,7 @@ namespace P2PLearningAPI.Repository
         }
 
         // Get a single post by ID
-        public Post GetPost(long id)
+        public Post? GetPost(long id)
         {
             return _context.Posts.FirstOrDefault(p => p.Id == id)!;
         }
@@ -39,10 +41,13 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(PostDTO postDTO, PostType postType)
+        public Post CreatePost(PostDTO postDTO, PostType postType, string token)
         {
             if (postDTO == null) 
                 throw new ArgumentNullException(nameof(postDTO));
+            (string userId, _, _) = _tokenService.DecodeToken(token);
+            if(userId != postDTO.PostedBy.Id)
+                throw new UnauthorizedAccessException("User is not authorized to create this post.");
             Post newPost;
             switch (postType)
             {
@@ -56,6 +61,11 @@ namespace P2PLearningAPI.Repository
                         throw new ArgumentException(nameof(postDTO.Question));
                     newPost = new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Question);
                     break;
+                case PostType.Reply:
+                    if (postDTO.Answer == null)
+                        throw new ArgumentException(nameof(postDTO.Answer));
+                    newPost = new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Answer);
+                    break;
                 default:
                     throw new ArgumentException("Invalid post type", nameof(postType));
             }
@@ -66,12 +76,15 @@ namespace P2PLearningAPI.Repository
         }
 
         // Update an existing post
-        public Post UpdatePost(Post post)
+        public Post UpdatePost(Post post, string token)
         {
             if(post == null)
                 throw new ArgumentNullException(nameof(post));
             if (!CheckPostExist(post.Id))
                 throw new InvalidOperationException("Post doesn't exist");
+            (string userId, _, _) = _tokenService.DecodeToken(token);
+            if (userId != post.UserID)
+                throw new UnauthorizedAccessException("User is not authorized to update this post.");
             _context.Posts.Update(post);
             if(Save())
                 return post;
@@ -79,24 +92,30 @@ namespace P2PLearningAPI.Repository
         }
 
         // Close a post by setting IsClosed to true
-        public bool ClosePost(long id)
+        public bool ClosePost(long id, string token)
         {
             var post = GetPost(id);
+            var (userId, _, _) = _tokenService.DecodeToken(token);
             if (post == null)
-                return false;
-
+                throw new InvalidOperationException("Post doesn't exist");
+            if (userId != post.UserID)
+                throw new UnauthorizedAccessException("User is not authorized to close this post.");
             post.IsClosed = true;
             return Save();
             
         }
 
         // Reopen a post by setting IsClosed to false
-        public bool ReopenPost(long id)
+        public bool ReopenPost(long id, string token)
         {
             var post = GetPost(id);
             if (post == null)
                 return false;
-
+            var (userId, _, _) = _tokenService.DecodeToken(token);
+            if (userId != post.UserID)
+                throw new UnauthorizedAccessException("User is not authorized to reopen this post.");
+            if (!post.IsClosed)
+                throw new InvalidOperationException("Post is already open");
             post.IsClosed = false;
             return Save();
         }
@@ -121,12 +140,14 @@ namespace P2PLearningAPI.Repository
         }
 
         // Delete a post by ID
-        public bool DeletePost(long id)
+        public bool DeletePost(long id, string token)
         {
             var post = GetPost(id);
             if (post == null)
-                return false;
-
+                throw new InvalidOperationException("Post doesn't exist");
+            var (userId, _, userType) = _tokenService.DecodeToken(token);
+            if (userId != post.UserID && userType != "Administrator")
+                throw new UnauthorizedAccessException("User is not authorized to delete this post.");
             _context.Posts.Remove(post);
             return Save();
         }

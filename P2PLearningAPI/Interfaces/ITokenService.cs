@@ -7,5 +7,7 @@ namespace P2PLearningAPI.Interfaces
     {
         public string GenerateToken(User user);
         public (string UserId, string Email, string UserType) DecodeToken(string token);
+        string GenerateRefreshToken();
+        ClaimsPrincipal ValidateRefreshToken(string refreshToken);
     }
 }

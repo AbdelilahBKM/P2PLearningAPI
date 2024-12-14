@@ -50,6 +50,12 @@ namespace P2PLearningAPI.Data
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Answer has many Replies
+            modelBuilder.Entity<Answer>()
+                .HasMany(a => a.Replies)
+                .WithOne(a => a.AnswerTo)
+                .HasForeignKey(a => a.AnswerId)
+                .OnDelete(DeleteBehavior.NoAction);
             // Discussion has many Questions
             modelBuilder.Entity<Discussion>()
                 .HasMany(d => d.Questions)
