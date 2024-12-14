@@ -10,6 +10,8 @@
         public DateTime Date_of_request { get; set; }
         public bool IsApproved { get; set; } = false;
         public bool IsClosed { get; set; } = false;
+        public DateTime Created_at { get; set; } = DateTime.Now;
+        public DateTime Updated_at { get; set; } = DateTime.Now;
         public Request() { }
         public Request(string Topic, string Description, User User)
         {
