@@ -19,6 +19,7 @@ namespace P2PLearningAPI.Models
         public ICollection<Post> Posts { get; } = new HashSet<Post>();
         public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
         public ICollection<Request> Requests { get; } = new HashSet<Request>();
+        public ICollection<Notification> Notifications { get; } = new HashSet<Notification>();
         public DateTime Last_Login { get; set; }
         public bool AccountDeleted { get; set; } = false;
         public DateTime Created_at { get; set; } = DateTime.Now;

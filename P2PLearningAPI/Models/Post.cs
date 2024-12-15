@@ -1,7 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-
-namespace P2PLearningAPI.Models
+﻿namespace P2PLearningAPI.Models
 {
     public class Post
     {

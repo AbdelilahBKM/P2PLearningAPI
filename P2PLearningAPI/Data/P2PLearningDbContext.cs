@@ -14,6 +14,7 @@ namespace P2PLearningAPI.Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +35,14 @@ namespace P2PLearningAPI.Data
                 .HasMany(u => u.Requests)
                 .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // User has many Notifications
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Notifications)
+                .WithOne(n => n.User)
+                .HasForeignKey(n => n.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 

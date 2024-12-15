@@ -9,11 +9,13 @@ namespace P2PLearningAPI.Repository
     {
         private readonly P2PLearningDbContext _context;
         private readonly ITokenService _tokenService;
+        private readonly ILogger<PostRepository> _logger;
 
-        public PostRepository(P2PLearningDbContext context, ITokenService tokenService)
+        public PostRepository(P2PLearningDbContext context, ITokenService tokenService, ILogger<PostRepository> logger)
         {
             _context = context;
             _tokenService = tokenService;
+            _logger = logger;
         }
 
         // Get all posts
@@ -43,36 +45,17 @@ namespace P2PLearningAPI.Repository
         // Create a new post
         public Post CreatePost(PostDTO postDTO, PostType postType, string token)
         {
-            if (postDTO == null) 
-                throw new ArgumentNullException(nameof(postDTO));
-            (string userId, _, _) = _tokenService.DecodeToken(token);
-            if(userId != postDTO.PostedBy.Id)
-                throw new UnauthorizedAccessException("User is not authorized to create this post.");
-            Post newPost;
-            switch (postType)
-            {
-                case PostType.Question:
-                    if(postDTO.Discussion == null)
-                        throw new ArgumentNullException(nameof(postDTO.Discussion));
-                        newPost = new Question(postDTO.Title, postDTO.Content,postDTO.PostedBy, postDTO.Discussion);
-                    break;
-                case PostType.Answer:
-                    if (postDTO.Question == null)
-                        throw new ArgumentException(nameof(postDTO.Question));
-                    newPost = new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Question);
-                    break;
-                case PostType.Reply:
-                    if (postDTO.Answer == null)
-                        throw new ArgumentException(nameof(postDTO.Answer));
-                    newPost = new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Answer);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid post type", nameof(postType));
-            }
+            var (userId, _, _) = _tokenService.DecodeToken(token);
+            if (userId != postDTO.PostedBy.Id)
+                throw new UnauthorizedAccessException();
+
+            var newPost = CreatePostFromDTO(postDTO, postType);
             _context.Posts.Add(newPost);
-            if(Save())
-                return newPost;
-            throw new InvalidOperationException("Failed to save the Post to the database.");
+
+            if (!Save())
+                throw new InvalidOperationException("Failed to save the post");
+
+            return newPost;
         }
 
         // Update an existing post
@@ -156,6 +139,17 @@ namespace P2PLearningAPI.Repository
         public bool Save()
         {
             return _context.SaveChanges() > 0;
+        }
+
+        public Post CreatePostFromDTO(PostDTO postDTO, PostType postType)
+        {
+            return postType switch
+            {
+                PostType.Question => new Question(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Discussion ?? throw new ArgumentNullException(nameof(postDTO.Discussion))),
+                PostType.Answer => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Question ?? throw new ArgumentNullException(nameof(postDTO.Question))),
+                PostType.Reply => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Answer ?? throw new ArgumentNullException(nameof(postDTO.Answer))),
+                _ => throw new ArgumentException("Invalid post type", nameof(postType))
+            };
         }
     }
 }

@@ -22,6 +22,7 @@ namespace P2PLearningAPI.Interfaces
         bool ReopenPost(long id, string token);
         bool VoteOnPost(long id, Vote vote);
         bool DeleteVote(long id, Vote vote);
+        Post CreatePostFromDTO(PostDTO postDTO, PostType postType);
         bool Save();
     }
 }
