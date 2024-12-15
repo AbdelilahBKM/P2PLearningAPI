@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
@@ -45,7 +46,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Joining>))]
         [ProducesResponseType(404)]
-        public IActionResult GetJoiningsByUser(long userId)
+        public IActionResult GetJoiningsByUser(string userId)
         {
             var joinings = _joiningRepository.GetJoiningsByUser(userId);
             if (joinings == null || !joinings.Any())
@@ -68,6 +69,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Joining
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Joining))]
         [ProducesResponseType(400)]
@@ -77,12 +79,14 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest("Invalid joining data.");
             try
             {
-
+                var authHeader = Request.Headers["Authorization"]!;
+                string token = authHeader.ToString().Split(" ")[1];
                 var createdJoining = _joiningRepository.CreateJoining(
                     new Joining(
                         joining.User,
                         joining.Discussion
-                        )
+                        ),
+                    token
                     );
 
                 return CreatedAtAction(nameof(GetJoining), new { id = createdJoining.Id }, createdJoining);
@@ -94,6 +98,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         // DELETE: api/Joining/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
@@ -101,8 +106,9 @@ namespace P2PLearningAPI.Controllers
         {
             try
             {
-
-                var success = _joiningRepository.DeleteJoining(id);
+                var authHeader = Request.Headers["Authorization"]!;
+                string token = authHeader.ToString().Split(" ")[1];
+                var success = _joiningRepository.DeleteJoining(id, token);
                 if (!success)
                     return NotFound();
 

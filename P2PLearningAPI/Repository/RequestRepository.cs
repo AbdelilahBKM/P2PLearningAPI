@@ -8,20 +8,34 @@ namespace P2PLearningAPI.Repository
     public class RequestRepository : IRequestInterface
     {
         private readonly P2PLearningDbContext _context;
+        private readonly ITokenService _tokenService;
 
-        public RequestRepository(P2PLearningDbContext context)
+        public RequestRepository(P2PLearningDbContext context, ITokenService tokenService)
         {
             _context = context;
+            _tokenService = tokenService;
         }
 
-        public ICollection<Request> GetRequests()
+        public ICollection<Request> GetRequests(string token)
         {
+            var (_, _, userType) = _tokenService.DecodeToken(token);
+            if(userType != "Adminstrator")
+                throw new UnauthorizedAccessException("User is not an Adminstrator");
+
             return _context.Requests.Include(r => r.User).OrderBy(r => r.Date_of_request).ToList();
         }
 
-        public Request GetRequest(long id)
+        public Request? GetRequest(long id, string token)
         {
-            return _context.Requests.Include(r => r.User).FirstOrDefault(r => r.Id == id)!;
+            if(CheckRequestExist(id) == false)
+                return null;
+            var (UserId, _, userType) = _tokenService.DecodeToken(token);
+            var request = _context.Requests.Include(r => r.User).FirstOrDefault(r => r.Id == id)!;
+            
+            if (userType != "Adminstrator" && UserId != request.UserId)
+                throw new UnauthorizedAccessException("User is not an Adminstrator");
+            return request;
+
         }
 
         public bool CheckRequestExist(long id)
@@ -29,18 +43,24 @@ namespace P2PLearningAPI.Repository
             return _context.Requests.Any(r => r.Id == id);
         }
 
-        public ICollection<Request> GetRequestsByUser(long userId)
+        public ICollection<Request> GetRequestsByUser(string userId, string token)
         {
+            var (UserId, _, userType) = _tokenService.DecodeToken(token);
+            if (userType != "Adminstrator" && userId != UserId)
+                throw new UnauthorizedAccessException("User is not an Authorized to view this request");
             return _context.Requests.Include(r => r.User).Where(r => r.UserId == userId).ToList();
         }
 
-        public Request CreateRequest(Request request)
+        public Request CreateRequest(Request request, string token)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            Scholar user = _context.Scholars.Where(u => u.Id == request.Id).First();
+            User user = _context.Users.Where(u => u.Id == request.UserId).First();
             if (user == null)
                 throw new InvalidOperationException("User does not exist");
+            var (UserId, _, _) = _tokenService.DecodeToken(token);
+            if (UserId != user.Id)
+                throw new UnauthorizedAccessException("User is not Authorized to create this request");
             if (user.AddRequest(request))
             {
                 _context.Requests.Add(request);
@@ -51,41 +71,47 @@ namespace P2PLearningAPI.Repository
             throw new InvalidOperationException("User unable to Create Requests");
         }
 
-        public Request UpdateRequest(Request request)
+        public Request UpdateRequest(Request request, string token)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-
+            var (UserId, _, _) = _tokenService.DecodeToken(token);
+            if (UserId != request.UserId)
+                throw new UnauthorizedAccessException("User is not Authorized to update this request");
             _context.Requests.Update(request);
             Save();
             return request;
         }
 
-        public bool ApproveRequest(long id)
+        public bool ApproveRequest(long id, string token)
         {
-            var request = GetRequest(id);
+            var request = GetRequest(id, token);
             if (request == null)
                 return false;
-
+            var (_, _, userType) = _tokenService.DecodeToken(token);
+            if (userType != "Adminstrator")
+                throw new UnauthorizedAccessException("User is not an Adminstrator");
             request.ApproveRequest();
             _context.Requests.Update(request);
             return Save();
         }
 
-        public bool CloseRequest(long id)
+        public bool CloseRequest(long id, string token)
         {
-            var request = GetRequest(id);
+            var request = GetRequest(id, token);
             if (request == null)
                 return false;
-
+            var (_, _, userType) = _tokenService.DecodeToken(token);
+            if (userType != "Adminstrator")
+                throw new UnauthorizedAccessException("User is not an Adminstrator");
             request.CloseRequest();
             _context.Requests.Update(request);
             return Save();
         }
 
-        public bool DeleteRequest(long id)
+        public bool DeleteRequest(long id, string token)
         {
-            var request = GetRequest(id);
+            var request = GetRequest(id, token);
             if (request == null)
                 return false;
 

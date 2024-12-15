@@ -1,7 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-
-namespace P2PLearningAPI.Models
+﻿namespace P2PLearningAPI.Models
 {
     public class Post
     {
@@ -12,10 +9,12 @@ namespace P2PLearningAPI.Models
         public long Reputation { get; set; } = 0;
         public DateTime PostedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
-        public long UserID { get; set; }
+        public string UserID { get; set; }
         public User PostedBy { get; set; } = null!;
         public bool IsClosed { get; set; } = false;
         public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
+        public DateTime Created_at { get; set; } = DateTime.Now;
+        public DateTime Updated_at { get; set; } = DateTime.Now;
         public Post() { }
         public Post(string Title, string Content, User PostedBy) {
             this.Title = Title;

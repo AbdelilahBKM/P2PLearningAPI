@@ -24,7 +24,7 @@ namespace P2PLearningAPI.Repository
             return _context.Votes.Include(v => v.User).FirstOrDefault(v => v.Id == id)!;
         }
 
-        public bool CheckVoteExist(long postId, long userId)
+        public bool CheckVoteExist(long postId, string userId)
         {
             return _context.Votes.Any(v => v.PostId == postId && v.UserId == userId);
         }
@@ -34,7 +34,7 @@ namespace P2PLearningAPI.Repository
             return _context.Votes.Include(v => v.User).Where(v => v.PostId == postId).ToList();
         }
 
-        public ICollection<Vote> GetVotesByUser(long userId)
+        public ICollection<Vote> GetVotesByUser(string userId)
         {
             return _context.Votes.Include(v => v.Post).Where(v => v.UserId == userId).ToList();
         }

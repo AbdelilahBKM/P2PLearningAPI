@@ -10,11 +10,13 @@ namespace P2PLearningAPI.Repository
     public class JoiningRepository : IJoiningInterface
     {
         private readonly P2PLearningDbContext _context;
+        private readonly ITokenService _tokenService;
 
         // Constructor to inject the DbContext
-        public JoiningRepository(P2PLearningDbContext context)
+        public JoiningRepository(P2PLearningDbContext context, ITokenService tokenService)
         {
             _context = context;
+            _tokenService = tokenService;
         }
 
         // Get all joinings
@@ -24,13 +26,13 @@ namespace P2PLearningAPI.Repository
         }
 
         // Get a single joining by id
-        public Joining GetJoining(long id)
+        public Joining? GetJoining(long id)
         {
             return _context.Joinings.FirstOrDefault(j => j.Id == id);
         }
 
         // Get joinings by userId
-        public ICollection<Joining> GetJoiningsByUser(long userId)
+        public ICollection<Joining> GetJoiningsByUser(string userId)
         {
             return _context.Joinings.Where(j => j.UserId == userId).ToList();
         }
@@ -42,10 +44,13 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new joining
-        public Joining CreateJoining(Joining joining)
+        public Joining CreateJoining(Joining joining, string token)
         {
             if (joining == null)
                 throw new ArgumentNullException(nameof(joining));
+            (string userId, var _, var _) = _tokenService.DecodeToken(token);
+            if (joining.UserId != userId)
+                throw new UnauthorizedAccessException("Unauthorized to create this joining.");
             Joining test = _context.Joinings.Where(j => 
             (j.UserId == joining.UserId && j.DiscussionId == joining.DiscussionId)
                 ).First();
@@ -59,12 +64,14 @@ namespace P2PLearningAPI.Repository
         }
 
         // Delete a joining by id
-        public bool DeleteJoining(long id)
+        public bool DeleteJoining(long id, string Token)
         {
+            (string userId,var _,var _) = _tokenService.DecodeToken(Token);
             var joining = GetJoining(id);
             if (joining == null)
                 throw new InvalidOperationException("Joining not found.");
-
+            if(joining.UserId != userId)
+                throw new UnauthorizedAccessException("Unauthorized to delete this joining.");
             _context.Joinings.Remove(joining);
             return Save();
         }

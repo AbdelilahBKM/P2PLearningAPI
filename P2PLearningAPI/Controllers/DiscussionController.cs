@@ -2,6 +2,7 @@
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 using P2PLearningAPI.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace P2PLearningAPI.Controllers
 {
@@ -48,7 +49,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByOwner/{ownerId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Discussion>))]
         [ProducesResponseType(404)]
-        public IActionResult GetDiscussionsByOwner(long ownerId)
+        public IActionResult GetDiscussionsByOwner(string ownerId)
         {
             var discussions = _discussionRepository.GetDiscussionsByOwner(ownerId);
             if (discussions == null || !ModelState.IsValid)
@@ -58,11 +59,14 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Discussion
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Discussion))]
         [ProducesResponseType(400)]
         public IActionResult CreateDiscussion([FromBody] DiscussionDTO discussionDTO)
         {
+            var authHeader = Request.Headers["Authorization"]!;
+            string token = authHeader.ToString().Split(" ")[1];
             if (discussionDTO == null)
                 return BadRequest("Invalid discussion data.");
 
@@ -74,11 +78,13 @@ namespace P2PLearningAPI.Controllers
                     discussionDTO.Owner,
                     discussionDTO.d_Name,
                     discussionDTO.d_Profile
-                    ));
+                    ),
+                token);
             return CreatedAtAction(nameof(GetDiscussion), new { id = createdDiscussion.Id }, createdDiscussion);
         }
 
         // PUT: api/Discussion
+        [Authorize]
         [HttpPut]
         [ProducesResponseType(200, Type = typeof(Discussion))]
         [ProducesResponseType(400)]
@@ -90,12 +96,14 @@ namespace P2PLearningAPI.Controllers
 
             if (!_discussionRepository.CheckDiscussionExist(discussion.Id))
                 return NotFound();
-
-            var updatedDiscussion = _discussionRepository.UpdateDiscussion(discussion);
+            var authHeader = Request.Headers["Authorization"]!;
+            string token = authHeader.ToString().Split(" ")[1];
+            var updatedDiscussion = _discussionRepository.UpdateDiscussion(discussion, token);
             return Ok(updatedDiscussion);
         }
 
         // DELETE: api/Discussion/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
@@ -103,8 +111,9 @@ namespace P2PLearningAPI.Controllers
         {
             if (!_discussionRepository.CheckDiscussionExist(id))
                 return NotFound();
-
-            if (!_discussionRepository.DeleteDiscussion(id))
+            var authHeader = Request.Headers["Authorization"]!;
+            string token = authHeader.ToString().Split(" ")[1];
+            if (!_discussionRepository.DeleteDiscussion(id, token))
                 return BadRequest("Failed to delete discussion.");
 
             return NoContent();

@@ -1,14 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PLearningAPI.Models;
-using System.Reflection.Metadata;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace P2PLearningAPI.Data
 {
-    public class P2PLearningDbContext : DbContext
+    public class P2PLearningDbContext : IdentityDbContext<User>
     {
         public P2PLearningDbContext(DbContextOptions<P2PLearningDbContext> options) : base(options) {}
-        public DbSet<User> Users { get; set; }
-        public DbSet<Scholar> Scholars { get; set; }
-        public DbSet<Administrator> Administrators { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Joining> Joinings { get; set; }
@@ -16,9 +14,11 @@ namespace P2PLearningAPI.Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             //==> Primary keys
             modelBuilder.Entity<User>().HasKey(x => x.Id);
             modelBuilder.Entity<Request>().HasKey(x => x.Id);
@@ -29,18 +29,20 @@ namespace P2PLearningAPI.Data
 
             //==> Constraints
 
-            // User => Admin & Scholar
-            modelBuilder.Entity<User>()
-                .HasDiscriminator<String>("UserType")
-                .HasValue<Scholar>("Scholar")
-                .HasValue<Administrator>("Administrator");
-               
 
             // Scholar has many requests
-            modelBuilder.Entity<Scholar>()
-                .HasMany(s => s.Requests)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Requests)
                 .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // User has many Notifications
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Notifications)
+                .WithOne(n => n.User)
+                .HasForeignKey(n => n.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
@@ -57,6 +59,12 @@ namespace P2PLearningAPI.Data
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Answer has many Replies
+            modelBuilder.Entity<Answer>()
+                .HasMany(a => a.Replies)
+                .WithOne(a => a.AnswerTo)
+                .HasForeignKey(a => a.AnswerId)
+                .OnDelete(DeleteBehavior.NoAction);
             // Discussion has many Questions
             modelBuilder.Entity<Discussion>()
                 .HasMany(d => d.Questions)

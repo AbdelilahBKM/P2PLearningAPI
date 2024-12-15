@@ -58,7 +58,7 @@ namespace P2PLearningAPI.Controllers
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Vote>))]
         [ProducesResponseType(404)]
-        public IActionResult GetVotesByUser(long userId)
+        public IActionResult GetVotesByUser(string userId)
         {
             var votes = _voteRepository.GetVotesByUser(userId);
             if (votes == null || !votes.Any())
