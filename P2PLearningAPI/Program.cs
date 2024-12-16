@@ -37,7 +37,6 @@ builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
 builder.Services.AddScoped<IPostInterface, PostRepository>();
 builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
-builder.Services.AddScoped<INotificationService, NotificationRepository>();
 
 // JWT
 builder.Services.AddAuthentication(options =>
