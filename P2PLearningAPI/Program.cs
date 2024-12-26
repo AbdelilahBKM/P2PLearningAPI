@@ -63,12 +63,26 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddDbContext<P2PLearningDbContext>(options =>
    options.UseSqlServer(connectionString));
 
+// Configure CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost3000", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Frontend origin
+              .AllowAnyHeader()                    // Allow all headers
+              .AllowAnyMethod()                    // Allow all HTTP methods
+              .AllowCredentials();                 // Allow cookies or authentication headers
+    });
+});
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+// Use CORS before other middleware
+app.UseCors("AllowLocalhost3000");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
