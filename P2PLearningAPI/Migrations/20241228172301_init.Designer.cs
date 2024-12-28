@@ -12,8 +12,8 @@ using P2PLearningAPI.Data;
 namespace P2PLearningAPI.Migrations
 {
     [DbContext(typeof(P2PLearningDbContext))]
-    [Migration("20241214144325_updatePostModel")]
-    partial class updatePostModel
+    [Migration("20241228172301_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,6 +166,13 @@ namespace P2PLearningAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("D_Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("D_Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -189,6 +196,9 @@ namespace P2PLearningAPI.Migrations
                     b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Updated_at")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -224,6 +234,41 @@ namespace P2PLearningAPI.Migrations
                     b.ToTable("Joinings");
                 });
 
+            modelBuilder.Entity("P2PLearningAPI.Models.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("P2PLearningAPI.Models.Post", b =>
                 {
                     b.Property<long>("Id")
@@ -235,6 +280,9 @@ namespace P2PLearningAPI.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsClosed")
                         .HasColumnType("bit");
@@ -260,6 +308,9 @@ namespace P2PLearningAPI.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("Updated_at")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -283,6 +334,9 @@ namespace P2PLearningAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("Date_of_request")
                         .HasColumnType("datetime2");
 
@@ -299,6 +353,9 @@ namespace P2PLearningAPI.Migrations
                     b.Property<string>("Topic")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Updated_at")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -551,6 +608,17 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("P2PLearningAPI.Models.Notification", b =>
+                {
+                    b.HasOne("P2PLearningAPI.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("P2PLearningAPI.Models.Post", b =>
                 {
                     b.HasOne("P2PLearningAPI.Models.User", "PostedBy")
@@ -635,6 +703,8 @@ namespace P2PLearningAPI.Migrations
             modelBuilder.Entity("P2PLearningAPI.Models.User", b =>
                 {
                     b.Navigation("Joinings");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Posts");
 

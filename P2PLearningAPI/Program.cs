@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using P2PLearningAPI.Repositories;
 using P2PLearningAPI.Services;
+using Microsoft.OpenApi.Models;
 
 DotNetEnv.Env.Load();
 
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IPostInterface, PostRepository>();
 builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IUploadInterface, UploadRepository>();
 
 // JWT
 builder.Services.AddAuthentication(options =>
@@ -79,6 +81,13 @@ builder.Services.AddCors(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+
+    // Support file uploads
+    c.OperationFilter<SwaggerFileUploadOperationFilter>();
+});
 
 var app = builder.Build();
 // Use CORS before other middleware
@@ -94,8 +103,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Enable serving static files from the wwwroot folder
+app.UseStaticFiles();
+
 // Use CORS
 app.UseCors("AllowNodeFrontend");
+
+
 
 app.UseAuthentication();
 app.UseAuthorization();

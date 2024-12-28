@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace P2PLearningAPI.Repository
 {
@@ -40,7 +41,7 @@ namespace P2PLearningAPI.Repository
 
         public User? GetUser(string id)
         {
-            return _context.Users.Find(id);
+            return _context.Users.FirstOrDefault(u => u.Id == id);
         }
 
         public ICollection<User> GetUsers()

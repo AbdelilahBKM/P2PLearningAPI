@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace P2PLearningAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,16 +32,15 @@ namespace P2PLearningAPI.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    profilePicture = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProfilePicture = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UserType = table.Column<int>(type: "int", nullable: false),
+                    numberOfRequests = table.Column<int>(type: "int", nullable: true),
                     Last_Login = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserType = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    token = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Number_of_request = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -176,11 +175,14 @@ namespace P2PLearningAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     D_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     D_Profile = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    D_Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Number_of_members = table.Column<int>(type: "int", nullable: false),
                     Number_of_active_members = table.Column<int>(type: "int", nullable: false),
                     Number_of_posts = table.Column<int>(type: "int", nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -194,6 +196,29 @@ namespace P2PLearningAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    NotificationType = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Requests",
                 columns: table => new
                 {
@@ -204,7 +229,9 @@ namespace P2PLearningAPI.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Date_of_request = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    IsClosed = table.Column<bool>(type: "bit", nullable: false)
+                    IsClosed = table.Column<bool>(type: "bit", nullable: false),
+                    Created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,8 +282,10 @@ namespace P2PLearningAPI.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsClosed = table.Column<bool>(type: "bit", nullable: false),
+                    Created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Updated_at = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PostType = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
-                    PostId = table.Column<long>(type: "bigint", nullable: true),
+                    AnswerId = table.Column<long>(type: "bigint", nullable: true),
                     QuestionId = table.Column<long>(type: "bigint", nullable: true),
                     IsBestAnswer = table.Column<bool>(type: "bit", nullable: true),
                     DiscussionId = table.Column<long>(type: "bigint", nullable: true)
@@ -273,6 +302,11 @@ namespace P2PLearningAPI.Migrations
                         name: "FK_Posts_Discussions_DiscussionId",
                         column: x => x.DiscussionId,
                         principalTable: "Discussions",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Posts_Posts_AnswerId",
+                        column: x => x.AnswerId,
+                        principalTable: "Posts",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Posts_Posts_QuestionId",
@@ -361,6 +395,16 @@ namespace P2PLearningAPI.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Posts_AnswerId",
+                table: "Posts",
+                column: "AnswerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_DiscussionId",
                 table: "Posts",
                 column: "DiscussionId");
@@ -411,6 +455,9 @@ namespace P2PLearningAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Joinings");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "Requests");
