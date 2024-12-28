@@ -9,6 +9,8 @@ using P2PLearningAPI.Extensions;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using P2PLearningAPI.Repositories;
+using P2PLearningAPI.Services;
 
 DotNetEnv.Env.Load();
 
@@ -29,11 +31,13 @@ builder.Services.AddIdentityCore<User>()
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserIdentity, UserIdentiyRepository>();
 builder.Services.AddScoped<ITokenService, TokenServices>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDiscussionInterface, DiscussionRepository>();
 builder.Services.AddScoped<IJoiningInterface, JoiningRepository>();
 builder.Services.AddScoped<IPostInterface, PostRepository>();
 builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // JWT
 builder.Services.AddAuthentication(options =>

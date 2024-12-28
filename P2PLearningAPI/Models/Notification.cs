@@ -23,10 +23,9 @@
         {
         }
 
-        public Notification(User User, string message, NotificationType notificationType)
+        public Notification(string UserId, string message, NotificationType notificationType)
         {
-            this.User = User;
-            UserId = User.Id;
+            this.UserId = UserId;
             Message = message;
             NotificationType = notificationType;
         }

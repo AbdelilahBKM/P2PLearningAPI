@@ -14,17 +14,15 @@ namespace P2PLearningAPI.Services
             _notificationRepository = notificationRepository;
         }
 
-        public async Task CreateNotificationAsync(User user, string message, NotificationType notificationType)
+        public async Task CreateNotificationAsync(string userId, string message, NotificationType notificationType)
         {
-            Console.WriteLine($"Notification sent: {message}, User: {user.FirstName}, Type: {notificationType}");
-
-            var notification = new Notification(user, message, notificationType);
+            var notification = new Notification(userId, message, notificationType);
             await _notificationRepository.AddAsync(notification);
         }
 
         public async Task CreateNotificationsForUsersAsync(IEnumerable<User> users, string message, NotificationType notificationType)
         {
-            var notifications = users.Select(user => new Notification(user, message, notificationType));
+            var notifications = users.Select(user => new Notification(user.Id, message, notificationType));
             foreach (var notification in notifications)
             {
                 await _notificationRepository.AddAsync(notification);

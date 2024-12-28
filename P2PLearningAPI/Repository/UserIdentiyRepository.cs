@@ -71,7 +71,7 @@ namespace P2PLearningAPI.Repository
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                UserName = user.Email,
+                UserName = user.UserName,
                 UserType = user.UserType
             };
             var result = _userManager.CreateAsync(User, user.Password).Result;

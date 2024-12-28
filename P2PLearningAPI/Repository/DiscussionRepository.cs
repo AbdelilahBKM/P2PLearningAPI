@@ -56,8 +56,8 @@ namespace P2PLearningAPI.Repository
 
         public Discussion CreateDiscussion(Discussion discussion, string token)
         {
-            (var _, var _, var userType) = _tokenService.DecodeToken(token);
-            if (userType != "Administrator")
+            (var UserId, var _) = _tokenService.DecodeToken(token);
+            if (UserId != discussion.OwnerId)
                 throw new UnauthorizedAccessException("Unauthorized User");
             _context.Discussions.Add(discussion);
             if (Save()) return discussion;
@@ -67,9 +67,6 @@ namespace P2PLearningAPI.Repository
 
         public Discussion UpdateDiscussion(Discussion discussion, string token)
         {
-            (var _, var _, var userType) = _tokenService.DecodeToken(token);
-            if (userType != "Administrator")
-                throw new UnauthorizedAccessException("Unauthorized User");
             var existingDiscussion = GetDiscussion(discussion.Id);
             if (existingDiscussion == null)
                 throw new InvalidOperationException("Discussion not found.");
@@ -89,9 +86,6 @@ namespace P2PLearningAPI.Repository
 
         public bool DeleteDiscussion(long id, string token)
         {
-            (var _, var _, var userType) = _tokenService.DecodeToken(token);
-            if (userType != "Administrator")
-                throw new UnauthorizedAccessException("Unauthorized User");
             var discussion = GetDiscussion(id);
             if (discussion == null)
                 throw new InvalidOperationException("Discussion not found.");
