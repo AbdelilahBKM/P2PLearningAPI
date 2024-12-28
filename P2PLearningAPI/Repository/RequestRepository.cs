@@ -18,10 +18,6 @@ namespace P2PLearningAPI.Repository
 
         public ICollection<Request> GetRequests(string token)
         {
-            var (_, _, userType) = _tokenService.DecodeToken(token);
-            if(userType != "Adminstrator")
-                throw new UnauthorizedAccessException("User is not an Adminstrator");
-
             return _context.Requests.Include(r => r.User).OrderBy(r => r.Date_of_request).ToList();
         }
 
@@ -29,10 +25,10 @@ namespace P2PLearningAPI.Repository
         {
             if(CheckRequestExist(id) == false)
                 return null;
-            var (UserId, _, userType) = _tokenService.DecodeToken(token);
+            var (UserId, _) = _tokenService.DecodeToken(token);
             var request = _context.Requests.Include(r => r.User).FirstOrDefault(r => r.Id == id)!;
             
-            if (userType != "Adminstrator" && UserId != request.UserId)
+            if ( UserId != request.UserId)
                 throw new UnauthorizedAccessException("User is not an Adminstrator");
             return request;
 
@@ -45,8 +41,8 @@ namespace P2PLearningAPI.Repository
 
         public ICollection<Request> GetRequestsByUser(string userId, string token)
         {
-            var (UserId, _, userType) = _tokenService.DecodeToken(token);
-            if (userType != "Adminstrator" && userId != UserId)
+            var (UserId, _) = _tokenService.DecodeToken(token);
+            if ( userId != UserId)
                 throw new UnauthorizedAccessException("User is not an Authorized to view this request");
             return _context.Requests.Include(r => r.User).Where(r => r.UserId == userId).ToList();
         }
@@ -58,7 +54,7 @@ namespace P2PLearningAPI.Repository
             User user = _context.Users.Where(u => u.Id == request.UserId).First();
             if (user == null)
                 throw new InvalidOperationException("User does not exist");
-            var (UserId, _, _) = _tokenService.DecodeToken(token);
+            var (UserId, _) = _tokenService.DecodeToken(token);
             if (UserId != user.Id)
                 throw new UnauthorizedAccessException("User is not Authorized to create this request");
             if (user.AddRequest(request))
@@ -75,7 +71,7 @@ namespace P2PLearningAPI.Repository
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            var (UserId, _, _) = _tokenService.DecodeToken(token);
+            var (UserId, _) = _tokenService.DecodeToken(token);
             if (UserId != request.UserId)
                 throw new UnauthorizedAccessException("User is not Authorized to update this request");
             _context.Requests.Update(request);
@@ -88,9 +84,6 @@ namespace P2PLearningAPI.Repository
             var request = GetRequest(id, token);
             if (request == null)
                 return false;
-            var (_, _, userType) = _tokenService.DecodeToken(token);
-            if (userType != "Adminstrator")
-                throw new UnauthorizedAccessException("User is not an Adminstrator");
             request.ApproveRequest();
             _context.Requests.Update(request);
             return Save();
@@ -101,9 +94,6 @@ namespace P2PLearningAPI.Repository
             var request = GetRequest(id, token);
             if (request == null)
                 return false;
-            var (_, _, userType) = _tokenService.DecodeToken(token);
-            if (userType != "Adminstrator")
-                throw new UnauthorizedAccessException("User is not an Adminstrator");
             request.CloseRequest();
             _context.Requests.Update(request);
             return Save();

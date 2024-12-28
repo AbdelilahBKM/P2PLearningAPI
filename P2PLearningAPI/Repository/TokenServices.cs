@@ -14,10 +14,10 @@ namespace P2PLearningAPI.Repository
         {
             _configuration = configuration;
         }
-        public (string UserId, string Email, string UserType) DecodeToken(string token)
+        public (string UserId, string Email) DecodeToken(string token)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["Jwt:SecretKey"]!
+                _configuration["Jwt:SecretKey"]
             ));
             var tokenHandler = new JwtSecurityTokenHandler();
             var validationParameters = new TokenValidationParameters
@@ -34,21 +34,25 @@ namespace P2PLearningAPI.Repository
             try
             {
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-
-                var userId = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
-                var email = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value;
-                var userType = principal.Claims.FirstOrDefault(c => c.Type == "UserType")?.Value;
-
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userType))
+                foreach (var claim in principal.Claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+                var userId = principal.Claims.FirstOrDefault(
+                    c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+                var email = principal.Claims.FirstOrDefault(
+                    c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                Console.WriteLine($"User ID: {userId}, Email: {email}");
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
                 {
                     throw new SecurityTokenException("Invalid token claims.");
                 }
 
-                return (userId, email, userType);
+                return (userId, email);
             }
             catch (Exception ex)
             {
-                throw new SecurityTokenException("Invalid token", ex);
+                throw new SecurityTokenException($"Invalid token: {ex.Message}", ex);
             }
         }
 
@@ -63,7 +67,6 @@ namespace P2PLearningAPI.Repository
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("UserType", user.UserType.ToString())
             };
 
             var token = new JwtSecurityToken(

@@ -48,7 +48,7 @@ namespace P2PLearningAPI.Repository
         {
             if (joining == null)
                 throw new ArgumentNullException(nameof(joining));
-            (string userId, var _, var _) = _tokenService.DecodeToken(token);
+            (string userId, var _) = _tokenService.DecodeToken(token);
             if (joining.UserId != userId)
                 throw new UnauthorizedAccessException("Unauthorized to create this joining.");
             Joining test = _context.Joinings.Where(j => 
@@ -66,7 +66,7 @@ namespace P2PLearningAPI.Repository
         // Delete a joining by id
         public bool DeleteJoining(long id, string Token)
         {
-            (string userId,var _,var _) = _tokenService.DecodeToken(Token);
+            (string userId,var _) = _tokenService.DecodeToken(Token);
             var joining = GetJoining(id);
             if (joining == null)
                 throw new InvalidOperationException("Joining not found.");

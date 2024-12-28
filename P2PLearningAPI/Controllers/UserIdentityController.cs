@@ -102,7 +102,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         [Authorize]
-        [HttpPut("Udate")]
+        [HttpPut("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
         [ProducesResponseType(404)]
         public IActionResult UpdateUser(string id, [FromBody] UpdateDTO user)

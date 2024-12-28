@@ -45,7 +45,7 @@ namespace P2PLearningAPI.Repository
         // Create a new post
         public Post CreatePost(PostDTO postDTO, PostType postType, string token)
         {
-            var (userId, _, _) = _tokenService.DecodeToken(token);
+            var (userId, _) = _tokenService.DecodeToken(token);
             if (userId != postDTO.PostedBy.Id)
                 throw new UnauthorizedAccessException();
 
@@ -65,7 +65,7 @@ namespace P2PLearningAPI.Repository
                 throw new ArgumentNullException(nameof(post));
             if (!CheckPostExist(post.Id))
                 throw new InvalidOperationException("Post doesn't exist");
-            (string userId, _, _) = _tokenService.DecodeToken(token);
+            (string userId, _) = _tokenService.DecodeToken(token);
             if (userId != post.UserID)
                 throw new UnauthorizedAccessException("User is not authorized to update this post.");
             _context.Posts.Update(post);
@@ -78,7 +78,7 @@ namespace P2PLearningAPI.Repository
         public bool ClosePost(long id, string token)
         {
             var post = GetPost(id);
-            var (userId, _, _) = _tokenService.DecodeToken(token);
+            var (userId, _) = _tokenService.DecodeToken(token);
             if (post == null)
                 throw new InvalidOperationException("Post doesn't exist");
             if (userId != post.UserID)
@@ -94,7 +94,7 @@ namespace P2PLearningAPI.Repository
             var post = GetPost(id);
             if (post == null)
                 return false;
-            var (userId, _, _) = _tokenService.DecodeToken(token);
+            var (userId, _) = _tokenService.DecodeToken(token);
             if (userId != post.UserID)
                 throw new UnauthorizedAccessException("User is not authorized to reopen this post.");
             if (!post.IsClosed)
@@ -128,8 +128,8 @@ namespace P2PLearningAPI.Repository
             var post = GetPost(id);
             if (post == null)
                 throw new InvalidOperationException("Post doesn't exist");
-            var (userId, _, userType) = _tokenService.DecodeToken(token);
-            if (userId != post.UserID && userType != "Administrator")
+            var (userId, _) = _tokenService.DecodeToken(token);
+            if (userId != post.UserID)
                 throw new UnauthorizedAccessException("User is not authorized to delete this post.");
             _context.Posts.Remove(post);
             return Save();
