@@ -32,6 +32,13 @@ namespace P2PLearningAPI.Repository
                           .Include(d => d.Joinings)
                           .FirstOrDefault(d => d.Id == id);
         }
+        public Discussion? GetDiscussion(string name)
+        {
+            return _context.Discussions
+                          .Include(d => d.Questions)
+                          .Include(d => d.Joinings)
+                          .FirstOrDefault(d => d.D_Name == name);
+        }
 
         public bool CheckDiscussionExist(long id)
         {
@@ -59,6 +66,8 @@ namespace P2PLearningAPI.Repository
             (var UserId, var _) = _tokenService.DecodeToken(token);
             if (UserId != discussion.OwnerId)
                 throw new UnauthorizedAccessException("Unauthorized User");
+            if(GetDiscussion(discussion.D_Name) != null)
+                throw new InvalidOperationException("Discussion already exists.");
             _context.Discussions.Add(discussion);
             if (Save()) return discussion;
 

@@ -39,9 +39,18 @@ namespace P2PLearningAPI.Repository
             return _context.Users.Any(u => u.Id == id);
         }
 
+        public bool CheckUserExistByUsername(string username)
+        {
+            return _context.Users.Any(u => u.UserName == username);
+        }
+
         public User? GetUser(string id)
         {
             return _context.Users.FirstOrDefault(u => u.Id == id);
+        }
+        public User? GetUserByUsername(string username)
+        {
+            return _context.Users.FirstOrDefault(u => u.UserName == username);
         }
 
         public ICollection<User> GetUsers()

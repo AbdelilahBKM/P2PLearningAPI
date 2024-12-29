@@ -40,6 +40,16 @@ namespace P2PLearningAPI.Controllers
                 return NotFound();
             return Ok(user);
         }
+        [HttpGet("Username/{username}")]
+        [ProducesResponseType(200, Type = typeof(User))]
+        [ProducesResponseType(404)]
+        public IActionResult GetUserByUsername(string username)
+        {
+            var user = _userIdentityRepository.GetUserByUsername(username);
+            if (user == null)
+                return NotFound();
+            return Ok(user);
+        }
 
         [HttpPost("Login")]
         [ProducesResponseType(200, Type = typeof(User))]

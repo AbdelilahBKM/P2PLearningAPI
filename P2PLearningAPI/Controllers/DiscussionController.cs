@@ -48,6 +48,17 @@ namespace P2PLearningAPI.Controllers
 
             return Ok(discussion);
         }
+        [HttpGet("Name/{name}")]
+        [ProducesResponseType(200, Type = typeof(Discussion))]
+        [ProducesResponseType(404)]
+        public IActionResult GetDiscussion(string name)
+        {
+            var discussion = _discussionRepository.GetDiscussion(name);
+            if (discussion == null || !ModelState.IsValid)
+                return NotFound();
+
+            return Ok(discussion);
+        }
 
         // GET: api/Discussion/ByOwner/{ownerId}
         [HttpGet("ByOwner/{ownerId}")]
