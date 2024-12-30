@@ -7,6 +7,7 @@ namespace P2PLearningAPI.Interfaces
     {
         ICollection<Joining> GetJoinings();
         Joining? GetJoining(long id);
+        Joining? GetJoining(string userId, long discussionId);
         ICollection<Joining> GetJoiningsByUser(string userId);
         ICollection<Joining> GetJoiningsByDiscussion(long discussionId);
         Joining CreateJoining(Joining joining, string token);
