@@ -7,11 +7,11 @@ namespace P2PLearningAPI.DTOs
     {
         public required string Title { get; set; }
         public required string Content { get; set; }
-        public required User PostedBy { get; set; }
-        public Discussion? Discussion { get; set; } = null;
-        public Question? Question { get; set; } = null;
-        public Answer? Answer { get; set; } = null;
-        public PostType PostType { get; set; }
-        
+        public required string PostedBy { get; set; }
+        public long? DiscussionId { get; set; } = null;
+        public long? QuestionId { get; set; } = null;
+        public long? AnswerId { get; set; } = null;
+        public PostType PostType { get; set; } // Question, Answer, Reply
+
     }
 }

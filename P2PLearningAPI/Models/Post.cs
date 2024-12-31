@@ -16,11 +16,10 @@
         public DateTime Created_at { get; set; } = DateTime.Now;
         public DateTime Updated_at { get; set; } = DateTime.Now;
         public Post() { }
-        public Post(string Title, string Content, User PostedBy) {
+        public Post(string Title, string Content, string PostedBy) {
             this.Title = Title;
             this.Content = Content;
-            this.PostedBy = PostedBy;
-            this.UserID = PostedBy.Id;
+            this.UserID = PostedBy;
         }
         public void AddVote(Vote vote)
         {

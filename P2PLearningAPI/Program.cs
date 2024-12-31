@@ -61,6 +61,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// json soft reference
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
+
 // Define and register the DbContext directly with the connection string
 builder.Services.AddDbContext<P2PLearningDbContext>(options =>
     options.UseSqlServer(connectionString));

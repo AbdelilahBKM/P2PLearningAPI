@@ -1,4 +1,5 @@
-﻿using P2PLearningAPI.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using P2PLearningAPI.Data;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
@@ -21,19 +22,54 @@ namespace P2PLearningAPI.Repository
         // Get all posts
         public ICollection<Post> GetPosts()
         {
-            return _context.Posts.ToList();
+            return _context.Posts
+                .Include(p => p.PostedBy)
+                .ToList();
         }
 
         // Get a single post by ID
+        // Get a single post by ID
         public Post? GetPost(long id)
         {
-            return _context.Posts.FirstOrDefault(p => p.Id == id)!;
+            // Get the Post by ID, including related entities (PostedBy, Answers, etc.)
+            var post = _context.Posts
+                .Include(p => p.PostedBy) // Always include PostedBy
+                .FirstOrDefault(p => p.Id == id);
+
+            // If the post is not found, return null
+            if (post == null)
+            {
+                return null;
+            }
+
+            // Check if the post is a Question and return the associated data
+            if (post is Question question)
+            {
+                return _context.Questions
+                    .Include(q => q.Answers)        // Include Answers for the Question
+                    .Include(q => q.Discussion)     // Include Discussion for the Question
+                    .FirstOrDefault(q => q.Id == id); // Use the ID to ensure you're getting the right Question
+            }
+            // Otherwise, check if it's an Answer and return the associated data
+            else if (post is Answer answer)
+            {
+                return _context.Answers
+                    .Include(a => a.Replies)        // Include Replies for the Answer
+                    .Include(a => a.Question)       // Include the Question the Answer belongs to
+                    .FirstOrDefault(a => a.Id == id); // Use the ID to ensure you're getting the right Answer
+            }
+
+            // If it's neither a Question nor an Answer, return null
+            return null;
         }
+
 
         // Get posts by user ID
         public ICollection<Post> GetPostsByUser(string userId)
         {
-            return _context.Posts.Where(p => p.UserID == userId).ToList();
+            return _context.Posts
+                .Include(p => p.PostedBy)
+                .Where(p => p.UserID == userId).ToList();
         }
 
         // Check if a post exists by ID
@@ -46,7 +82,7 @@ namespace P2PLearningAPI.Repository
         public Post CreatePost(PostDTO postDTO, PostType postType, string token)
         {
             var (userId, _) = _tokenService.DecodeToken(token);
-            if (userId != postDTO.PostedBy.Id)
+            if (userId != postDTO.PostedBy)
                 throw new UnauthorizedAccessException();
 
             var newPost = CreatePostFromDTO(postDTO, postType);
@@ -103,6 +139,23 @@ namespace P2PLearningAPI.Repository
             return Save();
         }
 
+        public bool MarkPostAsSolved(long id, string token)
+        {
+            var post = GetPost(id);
+            if (post == null)
+                return false;
+            var (userId, _) = _tokenService.DecodeToken(token);
+            if (userId != post.UserID)
+                throw new UnauthorizedAccessException("User is not authorized to mark this post as solved.");
+
+            if (post is not Question question)
+                throw new InvalidOperationException("Post is not a question");
+
+            question.isAnswered = true;
+
+            return Save();
+        }
+
         // Vote on a post (adjust Reputation)
         public bool VoteOnPost(long postId, Vote vote)
         {
@@ -145,9 +198,9 @@ namespace P2PLearningAPI.Repository
         {
             return postType switch
             {
-                PostType.Question => new Question(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Discussion ?? throw new ArgumentNullException(nameof(postDTO.Discussion))),
-                PostType.Answer => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Question ?? throw new ArgumentNullException(nameof(postDTO.Question))),
-                PostType.Reply => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.Answer ?? throw new ArgumentNullException(nameof(postDTO.Answer))),
+                PostType.Question => new Question(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.DiscussionId ?? throw new ArgumentNullException(nameof(postDTO.DiscussionId))),
+                PostType.Answer => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.QuestionId ?? throw new ArgumentNullException(nameof(postDTO.QuestionId))),
+                PostType.Reply => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.AnswerId ?? throw new ArgumentNullException(nameof(postDTO.AnswerId))),
                 _ => throw new ArgumentException("Invalid post type", nameof(postType))
             };
         }

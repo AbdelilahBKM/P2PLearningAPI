@@ -1,4 +1,5 @@
-﻿using P2PLearningAPI.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using P2PLearningAPI.Data;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 using System;
@@ -39,7 +40,10 @@ namespace P2PLearningAPI.Repository
         // Get joinings by userId
         public ICollection<Joining> GetJoiningsByUser(string userId)
         {
-            return _context.Joinings.Where(j => j.UserId == userId).ToList();
+            return _context.Joinings
+                .Where(j => j.UserId == userId)
+                .Include(j => j.Discussion)
+                .ToList();
         }
 
         // Get joinings by discussionId

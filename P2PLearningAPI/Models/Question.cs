@@ -5,15 +5,15 @@
         public Discussion Discussion { get; set; } = null!;
         public long DiscussionId { get; set; }
         public ICollection<Answer> Answers { get; } = new List<Answer>();
+        public bool isAnswered { get; set; } = false;
         public Question() { }
         public Question(
             string Title, 
             string Content, 
-            User PostedBy, 
-            Discussion discussion
+            string PostedBy, 
+            long discussionId
             ): base(Title, Content, PostedBy) {
-            this.Discussion = discussion;
-            DiscussionId = discussion.Id;
+            this.DiscussionId = discussionId;
         }
         
     }

@@ -13,7 +13,7 @@
         public Answer(
             string Title,
             string Content,
-            User PostedBy,
+            string PostedBy,
             Question Question
             ) : base(Title, Content, PostedBy)
         {
@@ -24,12 +24,11 @@
         public Answer(
             string Title,
             string Content,
-            User PostedBy,
-            Answer AnswerTo
+            string PostedBy,
+            long AnswerId
             ) : base(Title, Content, PostedBy)
         {
-            this.AnswerTo = AnswerTo;
-            this.AnswerId = AnswerTo.Id;
+            this.AnswerId = AnswerId;
         }
     }
 }

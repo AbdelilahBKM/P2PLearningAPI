@@ -62,8 +62,6 @@ namespace P2PLearningAPI.Controllers
         public IActionResult GetJoiningsByUser(string userId)
         {
             var joinings = _joiningRepository.GetJoiningsByUser(userId);
-            if (joinings == null || !joinings.Any())
-                return NotFound();
 
             return Ok(joinings);
         }
