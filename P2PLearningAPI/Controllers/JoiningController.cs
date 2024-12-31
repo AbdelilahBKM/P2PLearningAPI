@@ -42,6 +42,19 @@ namespace P2PLearningAPI.Controllers
             return Ok(joining);
         }
 
+        // GET: api/Joining/{userId}/{discussionId}
+        [HttpGet("{userId}/{discussionId}")]
+        [ProducesResponseType(200, Type = typeof(Joining))]
+        [ProducesResponseType(404)]
+        public IActionResult GetJoining(string userId, long discussionId)
+        {
+            var joining = _joiningRepository.GetJoining(userId, discussionId);
+            if (joining == null)
+                return NotFound();
+
+            return Ok(joining);
+        }
+
         // GET: api/Joining/ByUser/{userId}
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Joining>))]
@@ -83,8 +96,8 @@ namespace P2PLearningAPI.Controllers
                 string token = authHeader.ToString().Split(" ")[1];
                 var createdJoining = _joiningRepository.CreateJoining(
                     new Joining(
-                        joining.User,
-                        joining.Discussion
+                        joining.userId,
+                        joining.discussionId
                         ),
                     token
                     );

@@ -31,6 +31,11 @@ namespace P2PLearningAPI.Repository
             return _context.Joinings.FirstOrDefault(j => j.Id == id);
         }
 
+        public Joining? GetJoining(string userId, long discussionId)
+        {
+            return _context.Joinings.FirstOrDefault(j => j.UserId == userId && j.DiscussionId == discussionId);
+        }
+
         // Get joinings by userId
         public ICollection<Joining> GetJoiningsByUser(string userId)
         {
@@ -51,15 +56,18 @@ namespace P2PLearningAPI.Repository
             (string userId, var _) = _tokenService.DecodeToken(token);
             if (joining.UserId != userId)
                 throw new UnauthorizedAccessException("Unauthorized to create this joining.");
-            Joining test = _context.Joinings.Where(j => 
+            Joining? test = _context.Joinings.Where(j => 
             (j.UserId == joining.UserId && j.DiscussionId == joining.DiscussionId)
-                ).First();
+                ).FirstOrDefault();
             if (test != null)
                 throw new InvalidOperationException("Joining already exist");
             _context.Joinings.Add(joining);
+            Discussion? discussion = _context.Discussions.FirstOrDefault(d => d.Id == joining.DiscussionId);
+            if (discussion == null)
+                throw new InvalidOperationException("Discussion not found.");
+            discussion.Number_of_members++;
             if (Save())
                 return joining;
-
             throw new InvalidOperationException("Failed to save the joining to the database.");
         }
 
@@ -72,7 +80,11 @@ namespace P2PLearningAPI.Repository
                 throw new InvalidOperationException("Joining not found.");
             if(joining.UserId != userId)
                 throw new UnauthorizedAccessException("Unauthorized to delete this joining.");
+            Discussion? discussion = _context.Discussions.FirstOrDefault(d => d.Id == joining.DiscussionId);
+            if (discussion == null)
+                throw new InvalidOperationException("Discussion not found.");
             _context.Joinings.Remove(joining);
+            discussion.Number_of_members--;
             return Save();
         }
 

@@ -20,7 +20,6 @@ namespace P2PLearningAPI.Repository
         {
             return _context.Discussions
                           .Include(d => d.Questions)
-                          .Include(d => d.Joinings)
                           .OrderBy(d => d.Id)
                           .ToList();
         }
@@ -29,14 +28,12 @@ namespace P2PLearningAPI.Repository
         {
             return _context.Discussions
                           .Include(d => d.Questions)
-                          .Include(d => d.Joinings)
                           .FirstOrDefault(d => d.Id == id);
         }
         public Discussion? GetDiscussion(string name)
         {
             return _context.Discussions
                           .Include(d => d.Questions)
-                          .Include(d => d.Joinings)
                           .FirstOrDefault(d => d.D_Name == name);
         }
 

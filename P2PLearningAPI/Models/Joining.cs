@@ -9,13 +9,10 @@
         public Discussion Discussion { get; set; } = null!;
         public DateTime JoinedAt { get; set; } = DateTime.Now;
         public Joining() { }
-        public Joining(User user, Discussion discussion)
+        public Joining(string userId, long discussionId)
         {
-            this.User = user;
-            this.UserId = user.Id;
-            this.Discussion = discussion;
-            this.DiscussionId = discussion.Id;
-
+            this.DiscussionId = discussionId;
+            this.UserId = userId;
         }
     }
 }
