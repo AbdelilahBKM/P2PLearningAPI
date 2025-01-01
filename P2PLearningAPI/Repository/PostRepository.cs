@@ -79,18 +79,23 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(PostDTO postDTO, PostType postType, string token)
+        public Post CreatePost(PostDTO postDTO, string token)
         {
             var (userId, _) = _tokenService.DecodeToken(token);
             if (userId != postDTO.PostedBy)
                 throw new UnauthorizedAccessException();
 
-            var newPost = CreatePostFromDTO(postDTO, postType);
+            var newPost = CreatePostFromDTO(postDTO, postDTO.PostType);
             _context.Posts.Add(newPost);
-
+            if (postDTO.PostType == PostType.Question)
+            {
+                Discussion discussion = _context.Discussions.FirstOrDefault(d => d.Id == postDTO.DiscussionId)!;
+                if (discussion == null)
+                    throw new InvalidOperationException("Discussion doesn't exist");
+                discussion.Number_of_posts++;
+            }
             if (!Save())
                 throw new InvalidOperationException("Failed to save the post");
-
             return newPost;
         }
 
@@ -198,9 +203,26 @@ namespace P2PLearningAPI.Repository
         {
             return postType switch
             {
-                PostType.Question => new Question(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.DiscussionId ?? throw new ArgumentNullException(nameof(postDTO.DiscussionId))),
-                PostType.Answer => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.QuestionId ?? throw new ArgumentNullException(nameof(postDTO.QuestionId))),
-                PostType.Reply => new Answer(postDTO.Title, postDTO.Content, postDTO.PostedBy, postDTO.AnswerId ?? throw new ArgumentNullException(nameof(postDTO.AnswerId))),
+                PostType.Question => new Question(
+                    postDTO.Title,
+                    postDTO.Content,
+                    postDTO.PostedBy,
+                    postDTO.DiscussionId ?? throw new ArgumentNullException(nameof(postDTO.DiscussionId), "DiscussionId is required for Question posts.")
+                ),
+                PostType.Answer => new Answer(
+                    postDTO.Title,
+                    postDTO.Content,
+                    postDTO.PostedBy,
+                    postDTO.QuestionId ?? throw new ArgumentNullException(nameof(postDTO.QuestionId), "QuestionId is required for Answer posts."),
+                    postType
+                    ),
+                PostType.Reply => new Answer(
+                    postDTO.Title,
+                    postDTO.Content,
+                    postDTO.PostedBy,
+                    postDTO.AnswerId ?? throw new ArgumentNullException(nameof(postDTO.AnswerId), "AnswerId is required for Reply posts."),
+                    postType
+                    ),
                 _ => throw new ArgumentException("Invalid post type", nameof(postType))
             };
         }

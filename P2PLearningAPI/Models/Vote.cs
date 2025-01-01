@@ -2,8 +2,8 @@
 {
     public enum VoteType
     {
-        Positive,
-        Negative
+        Positive, // 0
+        Negative // 1
     }
     public class Vote
     {
@@ -14,11 +14,9 @@
         public Post Post { get; set; } = null!;
         public VoteType VoteType { get; set; }
         public Vote() { }
-        public Vote(User user, Post post, VoteType voteType) { 
-            this.User = user;
-            this.UserId = user.Id;
-            this.Post = post;
-            this.PostId = post.Id;
+        public Vote(string userId, long postId, VoteType voteType) { 
+            this.UserId = userId;
+            this.PostId = postId;
             this.VoteType = voteType;
         }
     }

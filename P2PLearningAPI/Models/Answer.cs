@@ -1,4 +1,6 @@
-﻿namespace P2PLearningAPI.Models
+﻿using P2PLearningAPI.Interfaces;
+
+namespace P2PLearningAPI.Models
 {
     public class Answer: Post
     {
@@ -14,21 +16,18 @@
             string Title,
             string Content,
             string PostedBy,
-            Question Question
+            long id,
+            PostType postType
             ) : base(Title, Content, PostedBy)
         {
-            this.Question = Question;
-            this.QuestionId = Question.Id;
-        }
-
-        public Answer(
-            string Title,
-            string Content,
-            string PostedBy,
-            long AnswerId
-            ) : base(Title, Content, PostedBy)
-        {
-            this.AnswerId = AnswerId;
+            if (postType == PostType.Answer)
+            {
+                this.QuestionId = id;
+            }
+            else if (postType == PostType.Reply)
+            {
+                this.AnswerId = id;
+            }
         }
     }
 }

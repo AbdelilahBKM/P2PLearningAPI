@@ -19,11 +19,15 @@ namespace P2PLearningAPI.Repository
             return _context.Votes.Include(v => v.User).OrderBy(v => v.Id).ToList();
         }
 
-        public Vote GetVote(long id)
+        public Vote? GetVote(long id)
         {
             return _context.Votes.Include(v => v.User).FirstOrDefault(v => v.Id == id)!;
         }
 
+        public Vote? GetVote(long postId, string userId)
+        {
+            return _context.Votes.Include(v => v.User).FirstOrDefault(v => v.PostId == postId && v.UserId == userId);
+        }
         public bool CheckVoteExist(long postId, string userId)
         {
             return _context.Votes.Any(v => v.PostId == postId && v.UserId == userId);
@@ -43,9 +47,21 @@ namespace P2PLearningAPI.Repository
         {
             if (vote == null)
                 throw new ArgumentNullException(nameof(vote));
+            if (GetVote(vote.PostId, vote.UserId) != null)
+                throw new InvalidOperationException("vote already exists");
 
             _context.Votes.Add(vote);
-            if(Save())
+            Post post = _context.Posts.Find(vote.PostId);
+            if (post != null)
+            {
+                if (vote.VoteType == VoteType.Positive)
+                    post.Reputation++;
+                else if (vote.VoteType == VoteType.Negative)
+                    post.Reputation--;
+                else
+                    throw new InvalidOperationException("Invalid vote type");
+            }
+            if (Save())
                 return vote;
             throw new InvalidOperationException("unable to create vote");
         }

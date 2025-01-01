@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
@@ -54,6 +55,19 @@ namespace P2PLearningAPI.Controllers
             return Ok(votes);
         }
 
+        // GET: api/Vote/{postId}/{userId}
+        [HttpGet("{postId}/{userId}")]
+        [ProducesResponseType(200, Type = typeof(Vote))]
+        [ProducesResponseType(404)]
+        public IActionResult GetVote(long postId, string userId)
+        {
+            var vote = _voteRepository.GetVote(postId, userId);
+            if (vote == null)
+                return NotFound();
+
+            return Ok(vote);
+        }
+
         // GET: api/Vote/ByUser/{userId}
         [HttpGet("ByUser/{userId}")]
         [ProducesResponseType(200, Type = typeof(ICollection<Vote>))]
@@ -68,6 +82,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Vote
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Vote))]
         [ProducesResponseType(400)]
@@ -77,7 +92,7 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest("Invalid vote data.");
             try
             {
-                var createdVote = _voteRepository.CreateVote(new Vote(vote.User, vote.Post, vote.VoteType));
+                var createdVote = _voteRepository.CreateVote(new Vote(vote.UserId, vote.PostId, vote.VoteType));
                 if (createdVote == null)
                     return BadRequest("Unable to create the vote.");
 
@@ -90,6 +105,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         // DELETE: api/Vote/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]

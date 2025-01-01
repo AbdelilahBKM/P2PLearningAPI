@@ -4,8 +4,8 @@ namespace P2PLearningAPI.DTOs
 {
     public class VoteDTO
     {
-        public User User { get; set; }
-        public Post Post { get; set; }
+        public string UserId { get; set; }
+        public long PostId { get; set; }
         public VoteType VoteType { get; set; }
 
     }

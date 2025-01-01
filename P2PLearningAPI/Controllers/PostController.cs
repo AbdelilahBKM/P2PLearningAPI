@@ -61,7 +61,7 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(201, Type = typeof(Post))]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public IActionResult CreatePost([FromBody] PostDTO postDTO, [FromQuery] PostType postType)
+        public IActionResult CreatePost([FromBody] PostDTO postDTO)
         {
             if (postDTO == null)
                 return BadRequest("Invalid post data.");
@@ -69,7 +69,7 @@ namespace P2PLearningAPI.Controllers
             {
                 var authHeader = Request.Headers["Authorization"];
                 string token = authHeader.ToString().Split(" ")[1];
-                var createdPost = _postRepository.CreatePost(postDTO, postType, token);
+                var createdPost = _postRepository.CreatePost(postDTO, token);
                 return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
             }
             catch (Exception ex)
