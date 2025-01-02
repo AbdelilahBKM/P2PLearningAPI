@@ -96,7 +96,7 @@ namespace P2PLearningAPI.Repository
             }
             if (!Save())
                 throw new InvalidOperationException("Failed to save the post");
-            return newPost;
+            return GetPost(newPost.Id)!;
         }
 
         // Update an existing post
