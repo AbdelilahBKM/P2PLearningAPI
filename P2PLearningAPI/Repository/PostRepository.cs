@@ -192,6 +192,19 @@ namespace P2PLearningAPI.Repository
             _context.Posts.Remove(post);
             return Save();
         }
+        public bool MarkAsBestAnswer(long id, string token)
+        {
+            var (userId, _) = _tokenService.DecodeToken(token);
+            var answer = _context.Answers.FirstOrDefault(a => a.Id == id);
+            if (answer == null)
+                throw new InvalidOperationException("Answer doesn't exist");
+            var question = _context.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
+            if (question == null)
+                throw new InvalidOperationException("Question doesn't exist");
+            answer.IsBestAnswer = true;
+            question.isAnswered = true;
+            return Save();
+        }
 
         // Save changes to the database
         public bool Save()
@@ -226,5 +239,7 @@ namespace P2PLearningAPI.Repository
                 _ => throw new ArgumentException("Invalid post type", nameof(postType))
             };
         }
+
+        
     }
 }

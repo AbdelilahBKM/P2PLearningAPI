@@ -94,10 +94,10 @@ namespace P2PLearningAPI.Controllers
                 var authHeader = Request.Headers["Authorization"];
                 string token = authHeader.ToString().Split(" ")[1];
                 var updatedPost = _postRepository.UpdatePost(post, token);
-            if (updatedPost == null)
-                return NotFound();
+                if (updatedPost == null)
+                    return NotFound();
 
-            return Ok(updatedPost);
+                return Ok(updatedPost);
             }
             catch (Exception ex)
             {
@@ -161,12 +161,12 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(404)]
         public IActionResult VoteOnPost(long postId, [FromBody] Vote vote)
         {
-            
+
             var success = _postRepository.VoteOnPost(postId, vote);
             if (!success)
                 return NotFound();
 
-            return NoContent(); 
+            return NoContent();
         }
         // PUT: api/Post/Vote/{postId}/
         [Authorize]
@@ -182,6 +182,30 @@ namespace P2PLearningAPI.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        //POST: api/Post/MarkAsBestAnswer/{id}
+        [Authorize]
+        [HttpPost("MarkAsBestAnswer/{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        public IActionResult MarkAsBestAnswer(long id)
+        {
+            try
+            {
+                var authHeader = Request.Headers["Authorization"];
+                string token = authHeader.ToString().Split(" ")[1];
+                var success = _postRepository.MarkAsBestAnswer(id, token);
+                if (!success)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
         // DELETE: api/Post/{id}

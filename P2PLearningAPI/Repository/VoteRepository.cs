@@ -71,7 +71,17 @@ namespace P2PLearningAPI.Repository
             var vote = GetVote(id);
             if (vote == null)
                 return false;
-
+            long PostId = vote.PostId;
+            Post post = _context.Posts.Find(PostId);
+            if (post != null)
+            {
+                if (vote.VoteType == VoteType.Positive)
+                    post.Reputation--;
+                else if (vote.VoteType == VoteType.Negative)
+                    post.Reputation++;
+                else
+                    throw new InvalidOperationException("Invalid vote type");
+            }
             _context.Votes.Remove(vote);
             return Save();
         }
