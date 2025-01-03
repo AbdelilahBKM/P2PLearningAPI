@@ -47,6 +47,7 @@ namespace P2PLearningAPI.Repository
             {
                 return _context.Questions
                     .Include(q => q.Answers)        // Include Answers for the Question
+                    .ThenInclude(a => a.PostedBy)   // Include PostedBy for the Answers
                     .Include(q => q.Discussion)     // Include Discussion for the Question
                     .FirstOrDefault(q => q.Id == id); // Use the ID to ensure you're getting the right Question
             }
@@ -56,6 +57,7 @@ namespace P2PLearningAPI.Repository
                 return _context.Answers
                     .Include(a => a.Replies)        // Include Replies for the Answer
                     .Include(a => a.Question)       // Include the Question the Answer belongs to
+                    .Include(a => a.PostedBy)       // Include PostedBy for the Answer
                     .FirstOrDefault(a => a.Id == id); // Use the ID to ensure you're getting the right Answer
             }
 
