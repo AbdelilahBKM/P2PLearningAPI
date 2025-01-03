@@ -3,6 +3,7 @@ using P2PLearningAPI.Data;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
+using P2PLearningAPI.Services;
 
 namespace P2PLearningAPI.Repository
 {
@@ -11,11 +12,14 @@ namespace P2PLearningAPI.Repository
         private readonly P2PLearningDbContext _context;
         private readonly ITokenService _tokenService;
         private readonly ILogger<PostRepository> _logger;
+        private readonly INotificationService _notificationService;
 
-        public PostRepository(P2PLearningDbContext context, ITokenService tokenService, ILogger<PostRepository> logger)
+
+        public PostRepository(P2PLearningDbContext context, ITokenService tokenService, INotificationService notificationService, ILogger<PostRepository> logger)
         {
             _context = context;
             _tokenService = tokenService;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -87,17 +91,62 @@ namespace P2PLearningAPI.Repository
 
             var newPost = CreatePostFromDTO(postDTO, postDTO.PostType);
             _context.Posts.Add(newPost);
-            if (postDTO.PostType == PostType.Question)
+
+            // Notification Logic for Answer
+            if (postDTO.PostType == PostType.Answer)
             {
-                Discussion discussion = _context.Discussions.FirstOrDefault(d => d.Id == postDTO.DiscussionId)!;
-                if (discussion == null)
-                    throw new InvalidOperationException("Discussion doesn't exist");
-                discussion.Number_of_posts++;
+                var question = _context.Questions.Include(q => q.PostedBy).FirstOrDefault(q => q.Id == postDTO.QuestionId);
+                if (question != null)
+                {
+                    // Notify the user about the new answer
+                    _notificationService.CreateNotificationAsync(question.PostedBy.Id,
+                        $"Your question \"{question.Title}\" received a new answer.",
+                        NotificationType.Comment); // Assuming Answer is a Comment type of notification
+                }
             }
+            // Notification Logic for Reply
+            else if (postDTO.PostType == PostType.Reply)
+            {
+                var answer = _context.Answers.Include(a => a.PostedBy).FirstOrDefault(a => a.Id == postDTO.AnswerId);
+                if (answer != null)
+                {
+                    // Notify the user about the new reply
+                    _notificationService.CreateNotificationAsync(answer.PostedBy.Id,
+                        $"Your answer received a new reply.",
+                        NotificationType.Reply); // Using Reply type from NotificationType enum
+                }
+            }
+            // Notification Logic for New Question
+            else if (postDTO.PostType == PostType.Question)
+            {
+                // Assuming postDTO contains DiscussionId (or you can derive it from other logic)
+                var discussion = _context.Discussions.Include(d => d.Joinings)
+                                                      .ThenInclude(j => j.User) // Ensure we include the users in the joinings
+                                                      .FirstOrDefault(d => d.Id == postDTO.DiscussionId);
+
+                if (discussion != null)
+                {
+                    // Notify all participants, including the owner of the question
+                    foreach (var joining in discussion.Joinings)
+                    {
+                        // Notify the participant about the new question posted
+                        var notificationMessage = $"A new question has been posted: \"{newPost.Title}\"";
+                        _notificationService.CreateNotificationAsync(joining.User.Id,
+                            notificationMessage,
+                            NotificationType.NewQuestion); // Use the new NotificationType here
+                    }
+                }
+            
+        }
+
+            // Save the new post
             if (!Save())
                 throw new InvalidOperationException("Failed to save the post");
+
             return newPost;
         }
+
+
 
         // Update an existing post
         public Post UpdatePost(Post post, string token)

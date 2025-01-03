@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
+using P2PLearningAPI.Repositories;
+using P2PLearningAPI.Services;
 
 namespace P2PLearningAPI.Controllers
 {
@@ -11,10 +13,12 @@ namespace P2PLearningAPI.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostInterface _postRepository;
+        private readonly INotificationService _notificationService;
 
-        public PostController(IPostInterface postRepository)
+        public PostController(IPostInterface postRepository, INotificationService notificationService)
         {
             _postRepository = postRepository;
+            _notificationService = notificationService;
         }
 
         // GET: api/Post
@@ -206,5 +210,7 @@ namespace P2PLearningAPI.Controllers
                 return Unauthorized(ex.Message);
             }
         }
+       
+      
     }
 }

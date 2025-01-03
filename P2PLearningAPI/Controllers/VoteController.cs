@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.DTOs;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
+using P2PLearningAPI.Repository;
+using P2PLearningAPI.Services;
 
 namespace P2PLearningAPI.Controllers
 {
@@ -11,10 +13,16 @@ namespace P2PLearningAPI.Controllers
     public class VoteController : ControllerBase
     {
         private readonly IVoteInterface _voteRepository;
+        private readonly INotificationService _notificationService; 
+        private readonly PostRepository _postRepository;
 
-        public VoteController(IVoteInterface voteRepository)
+        public VoteController(IVoteInterface voteRepository, INotificationService notificationService,
+                              
+            PostRepository postRepository)
         {
             _voteRepository = voteRepository;
+            _notificationService = notificationService;
+            _postRepository = postRepository;
         }
 
         // GET: api/Vote
@@ -116,6 +124,36 @@ namespace P2PLearningAPI.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+        // POST: api/Vote/MarkBestAnswer/{postId}
+        [Authorize]
+        [HttpPost("MarkBestAnswer/{postId}")]
+        [ProducesResponseType(200, Type = typeof(Vote))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult MarkBestAnswer(long postId)
+        {
+            // Retrieve the post by postId (it could be a Question or an Answer)
+            var post = _postRepository.GetPost(postId);
+            if (post == null)
+                return NotFound("Post not found.");
+
+            // Ensure the post is an answer, not a question
+            if (!(post is Answer answer))
+                return BadRequest("The post is not an answer.");
+
+            // Mark the answer as the best (update the IsBestAnswer property)
+            answer.IsBestAnswer = true;
+
+            // Save changes
+            if (!_postRepository.Save())
+                return StatusCode(500, "Failed to save changes.");
+
+            // Notify the owner of the answer (this could be the user who posted the answer)
+            var notificationMessage = $"Your answer to the question \"{answer.Question.Title}\" was marked as the best answer.";
+            _notificationService.CreateNotificationAsync(answer.PostedBy.Id, notificationMessage, NotificationType.BestAnswer);
+
+            return Ok("Best answer marked and user notified.");
         }
     }
 }
