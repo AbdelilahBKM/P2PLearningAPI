@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -6,6 +7,7 @@ namespace P2PLearningAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BadgeController : Controller
     {
         private readonly IBadgeInterface _badgeRepository;
@@ -61,7 +63,7 @@ namespace P2PLearningAPI.Controllers
         }
 
         // Delete: api/Badge/{id}
-        [HttpPost]
+        [HttpDelete]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public IActionResult DeleteBadge(long id, [FromHeader] string token)
