@@ -42,6 +42,8 @@ namespace P2PLearningAPI.Repository
                             .Include (d => d.Owner)
                           .Include(d => d.Questions)
                           .ThenInclude(q => q.Answers)
+                          .Include(d => d.Questions)
+                            .ThenInclude(q => q.PostedBy)
                           .FirstOrDefault(d => d.D_Name == name);
         }
 
