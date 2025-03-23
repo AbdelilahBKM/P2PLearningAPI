@@ -107,10 +107,15 @@ namespace P2PLearningAPI.Controllers
             var notificationMessage = $"Your discussion {createdDiscussion.D_Name} has been created.";
             if (createdDiscussion.OwnerId != null)
             {
+                NotificationDTO notificationDTO = new NotificationDTO
+                {
+                    UserId = createdDiscussion.OwnerId,
+                    Message = notificationMessage,
+                    NotificationType = NotificationType.Discussion,
+                    ConcernedDiscussionId = createdDiscussion.Id
+                };
                 await _notificationService.CreateNotificationAsync(
-                    createdDiscussion.OwnerId,
-                    notificationMessage,
-                    NotificationType.Discussion
+                    notificationDTO
                 );
             }
             else
@@ -160,7 +165,8 @@ namespace P2PLearningAPI.Controllers
                 await _notificationService.CreateNotificationsForUsersAsync(
                     participants,
                     notificationMessage,
-                    NotificationType.Discussion
+                    NotificationType.Discussion,
+                    updatedDiscussion
                 );
             }
 
@@ -202,16 +208,6 @@ namespace P2PLearningAPI.Controllers
             if (deletedDiscussion.Owner != null && !participants.Contains(deletedDiscussion.Owner))
             {
                 participants.Add(deletedDiscussion.Owner);
-            }
-
-            // Send notifications to all participants and the owner
-            if (participants.Any())
-            {
-                await _notificationService.CreateNotificationsForUsersAsync(
-                    participants,
-                    notificationMessage,
-                    NotificationType.Discussion
-                );
             }
 
             return NoContent(); // No content response after successful deletion

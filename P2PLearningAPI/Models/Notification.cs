@@ -16,19 +16,42 @@
         public User User { get; set; }
         public string Message { get; set; }
         public bool IsRead { get; set; }
+        public Discussion? ConcernedDiscussion { get; set; }
+        public Post? ConcernedPost { get; set; }
+        public User? InteractiveUser { get; set; }
         public NotificationType NotificationType { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public Notification()
         {
         }
-
-        public Notification(string UserId, string message, NotificationType notificationType)
+        // constructor for notifications related to discussions
+        public Notification(string UserId, string message, NotificationType notificationType, Discussion discussion)
         {
             this.UserId = UserId;
             Message = message;
             NotificationType = notificationType;
+            ConcernedDiscussion = discussion;
         }
+        // constructor for notifications related to posts reply
+        public Notification(string UserId, string message, NotificationType notificationType, Post post, User user)
+        {
+            this.UserId = UserId;
+            Message = message;
+            NotificationType = notificationType;
+            ConcernedPost = post;
+            InteractiveUser = user;
+        }
+
+        // constructor for notifications related to post mark as best answer
+        public Notification(string UserId, string message, NotificationType notificationType, Post post)
+        {
+            this.UserId = UserId;
+            Message = message;
+            NotificationType = notificationType;
+            ConcernedPost = post;
+        }
+
         public void MarkAsRead()
         {
             IsRead = true;
