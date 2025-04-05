@@ -17,7 +17,6 @@ namespace P2PLearningAPI.Controllers
             _userIdentityRepository = userIdentityRepository;
         }
             
-        [Authorize]
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(ICollection<User>))]
         public IActionResult GetUsers()

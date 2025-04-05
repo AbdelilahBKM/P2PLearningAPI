@@ -12,6 +12,5 @@ namespace P2PLearningAPI.DTOs
         public long? QuestionId { get; set; } = null;
         public long? AnswerId { get; set; } = null;
         public PostType PostType { get; set; } // Question, Answer, Reply
-
     }
 }
