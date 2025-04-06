@@ -56,7 +56,6 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Post
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Post))]
         [ProducesResponseType(400)]
@@ -67,9 +66,7 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest("Invalid post data.");
             try
             {
-                var authHeader = Request.Headers["Authorization"];
-                string token = authHeader.ToString().Split(" ")[1];
-                var createdPost = _postRepository.CreatePost(postDTO, token);
+                var createdPost = _postRepository.CreatePost(postDTO);
 
                 return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
             }

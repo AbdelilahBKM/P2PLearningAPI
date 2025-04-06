@@ -53,13 +53,10 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new joining
-        public Joining CreateJoining(Joining joining, string token)
+        public Joining CreateJoining(Joining joining)
         {
             if (joining == null)
                 throw new ArgumentNullException(nameof(joining));
-            (string userId, var _) = _tokenService.DecodeToken(token);
-            if (joining.UserId != userId)
-                throw new UnauthorizedAccessException("Unauthorized to create this joining.");
             Joining? test = _context.Joinings.Where(j => 
             (j.UserId == joining.UserId && j.DiscussionId == joining.DiscussionId)
                 ).FirstOrDefault();

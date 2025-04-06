@@ -74,20 +74,17 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Discussion
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Discussion))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> CreateDiscussion([FromBody] DiscussionDTO discussionDTO)
         {
-            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-            {
-                return BadRequest("Authorization header is missing or invalid.");
-            }
-            string token = authHeader.ToString().Split(" ")[1];
-            Console.WriteLine(authHeader);
-            Console.WriteLine(token);
+            //var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            //if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            //{
+            //    return BadRequest("Authorization header is missing or invalid.");
+            //}
+            //string token = authHeader.ToString().Split(" ")[1];
             if (discussionDTO == null)
                 return BadRequest("Invalid discussion data.");
 
@@ -100,8 +97,7 @@ namespace P2PLearningAPI.Controllers
                     discussionDTO.d_Name,
                     discussionDTO.d_Description,
                     discussionDTO.d_Profile
-                ),
-                token);
+                ));
 
             // Check if the owner exists and notification message is defined
             var notificationMessage = $"Your discussion {createdDiscussion.D_Name} has been created.";

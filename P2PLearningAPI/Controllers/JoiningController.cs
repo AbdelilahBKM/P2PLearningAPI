@@ -80,7 +80,6 @@ namespace P2PLearningAPI.Controllers
         }
 
         // POST: api/Joining
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Joining))]
         [ProducesResponseType(400)]
@@ -90,14 +89,11 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest("Invalid joining data.");
             try
             {
-                var authHeader = Request.Headers["Authorization"]!;
-                string token = authHeader.ToString().Split(" ")[1];
                 var createdJoining = _joiningRepository.CreateJoining(
                     new Joining(
                         joining.userId,
                         joining.discussionId
-                        ),
-                    token
+                        )
                     );
 
                 return CreatedAtAction(nameof(GetJoining), new { id = createdJoining.Id }, createdJoining);

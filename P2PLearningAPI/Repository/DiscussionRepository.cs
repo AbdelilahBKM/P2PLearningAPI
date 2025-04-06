@@ -68,11 +68,11 @@ namespace P2PLearningAPI.Repository
                           .ToList();
         }
 
-        public Discussion CreateDiscussion(Discussion discussion, string token)
+        public Discussion CreateDiscussion(Discussion discussion)
         {
-            (var UserId, var _) = _tokenService.DecodeToken(token);
-            if (UserId != discussion.OwnerId)
-                throw new UnauthorizedAccessException("Unauthorized User");
+            //(var UserId, var _) = _tokenService.DecodeToken(token);
+            //if (UserId != discussion.OwnerId)
+            //    throw new UnauthorizedAccessException("Unauthorized User");
             if(GetDiscussion(discussion.D_Name) != null)
                 throw new InvalidOperationException("Discussion already exists.");
             _context.Discussions.Add(discussion);

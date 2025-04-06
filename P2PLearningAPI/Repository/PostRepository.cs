@@ -81,12 +81,8 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(PostDTO postDTO, string token)
+        public Post CreatePost(PostDTO postDTO)
         {
-            var (userId, _) = _tokenService.DecodeToken(token);
-            if (userId != postDTO.PostedBy)
-                throw new UnauthorizedAccessException();
-
             var newPost = CreatePostFromDTO(postDTO, postDTO.PostType);
             _context.Posts.Add(newPost);
             if (postDTO.PostType == PostType.Question)

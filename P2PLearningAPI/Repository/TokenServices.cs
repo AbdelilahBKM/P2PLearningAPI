@@ -73,7 +73,7 @@ namespace P2PLearningAPI.Repository
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddYears(100),
                 signingCredentials: creds
             );
 

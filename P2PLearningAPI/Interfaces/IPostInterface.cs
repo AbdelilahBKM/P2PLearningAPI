@@ -15,7 +15,7 @@ namespace P2PLearningAPI.Interfaces
         Post? GetPost(long id);
         bool CheckPostExist(long id);
         ICollection<Post> GetPostsByUser(string userId);
-        Post CreatePost(PostDTO post, string token);
+        Post CreatePost(PostDTO post);
         Post UpdatePost(Post post, string token);
         bool DeletePost(long id, string token);
         bool ClosePost(long id, string token);

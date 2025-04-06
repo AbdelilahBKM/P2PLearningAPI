@@ -9,7 +9,7 @@ namespace P2PLearningAPI.Interfaces
         Discussion? GetDiscussion(string name);
         bool CheckDiscussionExist(long id);
         ICollection<Discussion> GetDiscussionsByOwner(string ownerId);
-        Discussion CreateDiscussion(Discussion discussion, string token);
+        Discussion CreateDiscussion(Discussion discussion);
         Discussion UpdateDiscussion(Discussion discussion, string token);
         bool DeleteDiscussion(long id, string token);
         bool MarkDiscussionAsDeleted(long id);
