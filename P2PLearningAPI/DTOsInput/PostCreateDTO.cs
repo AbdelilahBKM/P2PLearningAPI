@@ -3,7 +3,7 @@ using P2PLearningAPI.Models;
 
 namespace P2PLearningAPI.DTOs
 {
-    public class PostDTO
+    public class PostCreateDTO
     {
         public required string Title { get; set; }
         public required string Content { get; set; }

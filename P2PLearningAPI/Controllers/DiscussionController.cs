@@ -78,7 +78,7 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Discussion))]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateDiscussion([FromBody] DiscussionDTO discussionDTO)
+        public async Task<IActionResult> CreateDiscussion([FromBody] CreateDiscussionDTO discussionDTO)
         {
             var authHeader = Request.Headers["Authorization"].FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))

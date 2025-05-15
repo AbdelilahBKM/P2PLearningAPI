@@ -81,7 +81,7 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(PostDTO postDTO, string token)
+        public Post CreatePost(PostCreateDTO postDTO, string token)
         {
             var (userId, _) = _tokenService.DecodeToken(token);
             if (userId != postDTO.PostedBy)
@@ -214,7 +214,7 @@ namespace P2PLearningAPI.Repository
             return _context.SaveChanges() > 0;
         }
 
-        public Post CreatePostFromDTO(PostDTO postDTO, PostType postType)
+        public Post CreatePostFromDTO(PostCreateDTO postDTO, PostType postType)
         {
             return postType switch
             {

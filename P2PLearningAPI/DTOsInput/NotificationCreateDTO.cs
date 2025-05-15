@@ -1,6 +1,6 @@
 ﻿namespace P2PLearningAPI.DTOs
 {
-    public class NotificationDTO
+    public class NotificationCreateDTO
     {
         public long Id { get; set; }
         public string UserId { get; set; }

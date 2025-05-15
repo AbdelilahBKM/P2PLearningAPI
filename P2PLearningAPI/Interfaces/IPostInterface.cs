@@ -15,14 +15,14 @@ namespace P2PLearningAPI.Interfaces
         Post? GetPost(long id);
         bool CheckPostExist(long id);
         ICollection<Post> GetPostsByUser(string userId);
-        Post CreatePost(PostDTO post, string token);
+        Post CreatePost(PostCreateDTO post, string token);
         Post UpdatePost(Post post, string token);
         bool DeletePost(long id, string token);
         bool ClosePost(long id, string token);
         bool ReopenPost(long id, string token);
         bool VoteOnPost(long id, Vote vote);
         bool DeleteVote(long id, Vote vote);
-        Post CreatePostFromDTO(PostDTO postDTO, PostType postType);
+        Post CreatePostFromDTO(PostCreateDTO postDTO, PostType postType);
         bool MarkAsBestAnswer(long id, string token);
         bool Save();
     }

@@ -61,7 +61,7 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(201, Type = typeof(Post))]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public IActionResult CreatePost([FromBody] PostDTO postDTO)
+        public IActionResult CreatePost([FromBody] PostCreateDTO postDTO)
         {
             if (postDTO == null)
                 return BadRequest("Invalid post data.");

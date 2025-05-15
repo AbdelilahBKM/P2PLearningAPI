@@ -2,7 +2,7 @@
 
 namespace P2PLearningAPI.DTOs
 {
-    public class DiscussionDTO
+    public class CreateDiscussionDTO
     {
         public required string d_Name { get; set; } = string.Empty;
         public required string d_Description { get; set; } = string.Empty;
