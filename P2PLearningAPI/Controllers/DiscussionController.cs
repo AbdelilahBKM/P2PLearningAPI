@@ -4,7 +4,7 @@ using P2PLearningAPI.Models;
 using P2PLearningAPI.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using P2PLearningAPI.Services;
-using P2PLearningAPI.Controllers;
+using P2PLearningAPI.DTOsOutput;
 
 namespace P2PLearningAPI.Controllers
 {
@@ -23,7 +23,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Discussion
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(ICollection<Discussion>))]
+        [ProducesResponseType(200, Type = typeof(ICollection<DiscussionDTO>))]
         public IActionResult GetDiscussions()
         {
             var discussions = _discussionRepository.GetDiscussions();
@@ -35,7 +35,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Discussion/{id}
         [HttpGet("{id}")]
-        [ProducesResponseType(200, Type = typeof(Discussion))]
+        [ProducesResponseType(200, Type = typeof(DiscussionDTO))]
         [ProducesResponseType(404)]
         public IActionResult GetDiscussion(long id)
         {
@@ -48,12 +48,14 @@ namespace P2PLearningAPI.Controllers
 
             return Ok(discussion);
         }
+
         [HttpGet("Name/{name}")]
-        [ProducesResponseType(200, Type = typeof(Discussion))]
+        [ProducesResponseType(200, Type = typeof(DiscussionDTO))]
         [ProducesResponseType(404)]
         public IActionResult GetDiscussion(string name)
         {
-            var discussion = _discussionRepository.GetDiscussion(name);
+            var decodedName = Uri.UnescapeDataString(name);
+            var discussion = _discussionRepository.GetDiscussion(decodedName);
             if (discussion == null || !ModelState.IsValid)
                 return NotFound();
 
@@ -62,7 +64,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Discussion/ByOwner/{ownerId}
         [HttpGet("ByOwner/{ownerId}")]
-        [ProducesResponseType(200, Type = typeof(ICollection<Discussion>))]
+        [ProducesResponseType(200, Type = typeof(ICollection<DiscussionDTO>))]
         [ProducesResponseType(404)]
         public IActionResult GetDiscussionsByOwner(string ownerId)
         {
@@ -76,9 +78,9 @@ namespace P2PLearningAPI.Controllers
         // POST: api/Discussion
         [Authorize]
         [HttpPost]
-        [ProducesResponseType(201, Type = typeof(Discussion))]
+        [ProducesResponseType(201, Type = typeof(DiscussionDTO))]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateDiscussion([FromBody] DiscussionDTO discussionDTO)
+        public async Task<IActionResult> CreateDiscussion([FromBody] CreateDiscussionDTO discussionDTO)
         {
             var authHeader = Request.Headers["Authorization"].FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
@@ -124,7 +126,7 @@ namespace P2PLearningAPI.Controllers
         // PUT: api/Discussion
         [Authorize]
         [HttpPut]
-        [ProducesResponseType(200, Type = typeof(Discussion))]
+        [ProducesResponseType(200, Type = typeof(DiscussionDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> UpdateDiscussion([FromBody] Discussion discussion)
@@ -143,15 +145,18 @@ namespace P2PLearningAPI.Controllers
             // Define the notification message
             var notificationMessage = $"The discussion '{updatedDiscussion.D_Name}' has been updated.";
 
+            Discussion postDiscussion = _discussionRepository.getFullDiscussionById(updatedDiscussion.Id)!;
+
             // Get the users who joined the discussion
-            var participants = updatedDiscussion.Joinings
+            var participants = postDiscussion.Joinings
                 .Select(j => j.User)
                 .ToList();
 
+
             // Include the discussion owner in the participants list if they aren't already in the list
-            if (updatedDiscussion.Owner != null && !participants.Contains(updatedDiscussion.Owner))
+            if (postDiscussion.Owner != null && !participants.Contains(postDiscussion.Owner))
             {
-                participants.Add(updatedDiscussion.Owner);
+                participants.Add(postDiscussion.Owner);
             }
 
             // Send notifications to the participants and owner
@@ -188,10 +193,11 @@ namespace P2PLearningAPI.Controllers
                 return BadRequest("Failed to delete discussion.");
 
             // Fetch the discussion details after deletion to get the participants
-            var deletedDiscussion = _discussionRepository.GetDiscussion(id);
+            var deletedDiscussion = _discussionRepository.getFullDiscussionById(id);
 
             // Construct the notification message
             var notificationMessage = $"The discussion '{deletedDiscussion.D_Name}' has been deleted.";
+
 
             // Get the users who joined the discussion
             var participants = deletedDiscussion.Joinings

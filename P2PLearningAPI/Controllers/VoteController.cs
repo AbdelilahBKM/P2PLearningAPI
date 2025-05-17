@@ -86,7 +86,7 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Vote))]
         [ProducesResponseType(400)]
-        public IActionResult CreateVote([FromBody] VoteDTO vote)
+        public IActionResult CreateVote([FromBody] VoteCreateDTO vote)
         {
             if (vote == null)
                 return BadRequest("Invalid vote data.");

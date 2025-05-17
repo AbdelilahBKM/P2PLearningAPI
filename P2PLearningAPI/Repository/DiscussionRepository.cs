@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PLearningAPI.Data;
+using P2PLearningAPI.DTOsOutput;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -16,35 +17,38 @@ namespace P2PLearningAPI.Repository
             _tokenService = tokenServices;
         }
 
-        public ICollection<Discussion> GetDiscussions()
+        public ICollection<DiscussionDTO> GetDiscussions()
         {
-            return _context.Discussions
-                          .Include(d => d.Questions)
-                          .ThenInclude(q => q.PostedBy)
-                          .Include(d => d.Questions)
-                          .ThenInclude(q => q.Answers)
-                          .OrderBy(d => d.Id)
-                          .ToList();
+            ICollection<Discussion> discussions = _context.Discussions
+                    .Include(d => d.Owner)
+                    .Include(d => d.Joinings)
+                        .ThenInclude(j => j.User)
+                    .Include(d => d.Questions)
+                        .ThenInclude(q => q.PostedBy)
+                    .Include(d => d.Questions)
+                        .ThenInclude(q => q.Answers)
+                            .ThenInclude(a => a.PostedBy)
+                    .Include(d => d.Questions)
+                        .ThenInclude(q => q.Votes)
+                    .AsSplitQuery()
+                    .ToList();
+            if (discussions == null || discussions.Count == 0)
+                return new List<DiscussionDTO>();
+            return discussions.Select(d => DiscussionDTO.FromDiscussion(d)).ToList();
         }
 
-        public Discussion? GetDiscussion(long id)
+        public DiscussionDTO? GetDiscussion(long id)
         {
-            return _context.Discussions
-                          .Include(d => d.Questions)
-                          .ThenInclude(q => q.PostedBy)
-                          .Include(d => d.Questions)
-                          .ThenInclude(q => q.Answers)
-                          .FirstOrDefault(d => d.Id == id);
+            var discussion = GetFullDiscussionQuery()
+                .FirstOrDefault(d => d.Id == id);
+            return discussion != null ? DiscussionDTO.FromDiscussion(discussion) : null;
         }
-        public Discussion? GetDiscussion(string name)
+
+        public DiscussionDTO? GetDiscussion(string name)
         {
-            return _context.Discussions
-                            .Include (d => d.Owner)
-                          .Include(d => d.Questions)
-                          .ThenInclude(q => q.Answers)
-                          .Include(d => d.Questions)
-                            .ThenInclude(q => q.PostedBy)
-                          .FirstOrDefault(d => d.D_Name == name);
+            var discussion = GetFullDiscussionQuery()
+                .FirstOrDefault(d => d.D_Name == name);
+            return discussion != null ? DiscussionDTO.FromDiscussion(discussion) : null;
         }
 
         public bool CheckDiscussionExist(long id)
@@ -52,23 +56,33 @@ namespace P2PLearningAPI.Repository
             return _context.Discussions.Any(d => d.Id == id);
         }
 
-        public ICollection<Question> GetQuestionsByDiscussion(long discussionId)
+        public ICollection<QuestionDTO> GetQuestionsByDiscussion(long discussionId)
         {
             var discussion = _context.Discussions
-                                    .Include(d => d.Questions)
-                                    .FirstOrDefault(d => d.Id == discussionId);
+                                  .Include(d => d.Questions)
+                                  .ThenInclude(q => q.PostedBy)
+                                  .Include(d => d.Questions)
+                                  .ThenInclude(q => q.Answers)
+                                  .FirstOrDefault(d => d.Id == discussionId);
+            if (discussion == null)
+                return new List<QuestionDTO>();
 
-            return discussion?.Questions.ToList() ?? new List<Question>();
+            return discussion.Questions
+                            .Select(q => QuestionDTO.FromQuestion(q))
+                            .ToList();
         }
 
-        public ICollection<Discussion> GetDiscussionsByOwner(string ownerId)
+        public ICollection<DiscussionDTO> GetDiscussionsByOwner(string ownerId)
         {
-            return _context.Discussions
+            ICollection<Discussion> discussions = _context.Discussions
                           .Where(d => d.OwnerId == ownerId)
                           .ToList();
+            if (discussions == null || discussions.Count == 0)
+                return new List<DiscussionDTO>();
+            return discussions.Select(d => DiscussionDTO.FromDiscussion(d)).ToList();
         }
 
-        public Discussion CreateDiscussion(Discussion discussion, string token)
+        public DiscussionDTO CreateDiscussion(Discussion discussion, string token)
         {
             (var UserId, var _) = _tokenService.DecodeToken(token);
             if (UserId != discussion.OwnerId)
@@ -76,14 +90,14 @@ namespace P2PLearningAPI.Repository
             if(GetDiscussion(discussion.D_Name) != null)
                 throw new InvalidOperationException("Discussion already exists.");
             _context.Discussions.Add(discussion);
-            if (Save()) return discussion;
+            if (Save()) return DiscussionDTO.FromDiscussion(discussion);
 
             throw new InvalidOperationException("Failed to save the discussion to the database.");
         }
 
-        public Discussion UpdateDiscussion(Discussion discussion, string token)
+        public DiscussionDTO UpdateDiscussion(Discussion discussion, string token)
         {
-            var existingDiscussion = GetDiscussion(discussion.Id);
+            var existingDiscussion = _context.Discussions.FirstOrDefault(d => d.Id == discussion.Id);
             if (existingDiscussion == null)
                 throw new InvalidOperationException("Discussion not found.");
 
@@ -95,14 +109,14 @@ namespace P2PLearningAPI.Repository
             existingDiscussion.IsDeleted = discussion.IsDeleted;
 
             _context.Discussions.Update(existingDiscussion);
-            if (Save()) return existingDiscussion;
+            if (Save()) return DiscussionDTO.FromDiscussion(existingDiscussion);
 
             throw new InvalidOperationException("Failed to update the discussion.");
         }
 
         public bool DeleteDiscussion(long id, string token)
         {
-            var discussion = GetDiscussion(id);
+            var discussion = _context.Discussions.FirstOrDefault(d => d.Id == id);
             if (discussion == null)
                 throw new InvalidOperationException("Discussion not found.");
 
@@ -112,7 +126,7 @@ namespace P2PLearningAPI.Repository
 
         public bool MarkDiscussionAsDeleted(long id)
         {
-            var discussion = GetDiscussion(id);
+            var discussion = _context.Discussions.FirstOrDefault(d => d.Id == id);
             if (discussion == null)
                 throw new InvalidOperationException("Discussion not found.");
 
@@ -124,6 +138,32 @@ namespace P2PLearningAPI.Repository
         public bool Save()
         {
             return _context.SaveChanges() > 0;
+        }
+
+        public Discussion? getFullDiscussionById(long id)
+        {
+            return _context.Discussions
+                .Include(d => d.Joinings)
+                .ThenInclude(j => j.User)
+                .Include(d => d.Questions)
+                .ThenInclude(q => q.Answers)
+                .FirstOrDefault(d => d.Id == id);
+        }
+
+        private IQueryable<Discussion> GetFullDiscussionQuery()
+        {
+            return _context.Discussions
+                .Include(d => d.Owner)
+                .Include(d => d.Joinings)
+                    .ThenInclude(j => j.User)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.PostedBy)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.Answers)
+                        .ThenInclude(a => a.PostedBy)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.Votes)
+                .AsSplitQuery();
         }
     }
 }

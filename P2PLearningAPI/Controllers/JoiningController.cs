@@ -84,7 +84,7 @@ namespace P2PLearningAPI.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Joining))]
         [ProducesResponseType(400)]
-        public IActionResult CreateJoining([FromBody] JoiningDTO joining)
+        public IActionResult CreateJoining([FromBody] JoiningCreateDTO joining)
         {
             if (joining == null)
                 return BadRequest("Invalid joining data.");

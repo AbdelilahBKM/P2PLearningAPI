@@ -40,8 +40,6 @@ builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUploadInterface, UploadRepository>();
-builder.Services.AddScoped<IBadgeInterface, BadgeRepository>();
-builder.Services.AddScoped<IUserBadgeInterface, UserBadgeRepository>();
 
 // JWT
 builder.Services.AddAuthentication(options =>

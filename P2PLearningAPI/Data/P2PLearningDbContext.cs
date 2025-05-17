@@ -15,8 +15,6 @@ namespace P2PLearningAPI.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Badge> Badges { get; set; }
-        public DbSet<UserBadge> UserBadges { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -110,21 +108,6 @@ namespace P2PLearningAPI.Data
                 .HasOne(p => p.PostedBy)
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.UserID)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // UserBadge: User & Badge
-            modelBuilder.Entity<UserBadge>()
-                .HasOne(ub => ub.Badge)
-                .WithMany(b => b.UserBadges)
-                .HasForeignKey(ub => ub.BadgeId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<UserBadge>()
-                .HasOne(ub => ub.User)
-                .WithMany(u => u.userBadges)
-                .HasForeignKey(ub => ub.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
