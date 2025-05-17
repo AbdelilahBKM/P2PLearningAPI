@@ -1,4 +1,6 @@
-﻿namespace P2PLearningAPI.DTOsOutput
+﻿using P2PLearningAPI.Models;
+
+namespace P2PLearningAPI.DTOsOutput
 {
     public class QuestionDTO: PostDTO
     {
@@ -18,10 +20,43 @@
             bool IsClosed,
             ICollection<VoteDTO> Votes,
             long discussionId,
-            ICollection<AnswerDTO> Answers
+            ICollection<AnswerDTO> Answers,
+            bool isAnswered
             ) : base(Id, Title, Content, IsUpdated, Reputation, PostedAt, UpdatedAt, PostedBy, IsClosed, Votes) {
             this.DiscussionId = discussionId;
             this.Answers = Answers;
+            this.isAnswered = isAnswered;
+        }
+
+        public static QuestionDTO FromQuestion(Question question)
+        {
+            return new QuestionDTO(
+                question.Id,
+                question.Title,
+                question.Content,
+                question.IsUpdated,
+                question.Reputation,
+                question.PostedAt,
+                question.UpdatedAt,
+                new UserMiniDTO
+                {
+                    Id = question.PostedBy.Id,
+                    UserName = question.PostedBy.UserName!,
+                    ProfilePicture = question.PostedBy.ProfilePicture
+                },
+                question.IsClosed,
+                question.Votes.Select(v => new VoteDTO
+                {
+                    Id = v.Id,
+                    VoteType = v.VoteType,
+                    UserId = v.UserId,
+                    PostId = v.PostId
+                }).ToList(),
+                question.DiscussionId,
+                question.Answers.Select(a => AnswerDTO.FromAnswer(a)).ToList(),
+                question.isAnswered
+            );
         }
     }
+
 }

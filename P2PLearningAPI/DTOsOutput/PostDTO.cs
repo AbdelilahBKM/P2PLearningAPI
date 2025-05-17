@@ -3,8 +3,8 @@
     public class PostDTO
     {
         public long Id { get; set; }
-        public required string Title { get; set; }
-        public required string Content { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
         public bool IsUpdated { get; set; }
         public long Reputation { get; set; }
         public DateTime PostedAt { get; set; }
@@ -22,7 +22,7 @@
             long Reputation, 
             DateTime PostedAt, 
             DateTime UpdatedAt, 
-            UserMiniDTO PostedB,
+            UserMiniDTO PostedBy,
             bool IsClosed,
             ICollection<VoteDTO> Votes
             )

@@ -34,70 +34,8 @@ namespace P2PLearningAPI.Repository
             }
             return posts.Select<Post, PostDTO>(post => post switch
             {
-                Question question => new QuestionDTO
-                {
-                    Id = question.Id,
-                    Title = question.Title,
-                    Content = question.Content,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = question.PostedBy.Id,
-                        UserName = question.PostedBy.UserName!,
-                        ProfilePicture = question.PostedBy.ProfilePicture,
-                        Email = question.PostedBy.Email!,
-                    },
-                    PostedAt = question.PostedAt,
-                    IsClosed = question.IsClosed,
-                    IsUpdated = question.IsUpdated,
-                    Reputation = question.Reputation,
-                    DiscussionId = question.DiscussionId,
-                    Answers = question.Answers.Select(a => new AnswerDTO
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        Title = a.Title,
-                        PostedBy = new UserMiniDTO
-                        {
-                            Id = a.PostedBy.Id,
-                            UserName = a.PostedBy.UserName!,
-                            ProfilePicture = a.PostedBy.ProfilePicture,
-                            Email = a.PostedBy.Email!,
-                        },
-                        PostedAt = a.PostedAt,
-                        IsClosed = a.IsClosed,
-                        IsUpdated = a.IsUpdated,
-                        Reputation = a.Reputation,
-                        IsBestAnswer = a.IsBestAnswer,
-                    }).ToList(),
-
-                },
-                Answer answer => new AnswerDTO
-                {
-                    Id = answer.Id,
-                    Title = answer.Title,
-                    Content = answer.Content,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = answer.PostedBy.Id,
-                        UserName = answer.PostedBy.UserName!,
-                        ProfilePicture = answer.PostedBy.ProfilePicture,
-                        Email = answer.PostedBy.Email!,
-                    },
-                    PostedAt = answer.PostedAt,
-                    IsClosed = answer.IsClosed,
-                    IsUpdated = answer.IsUpdated,
-                    Reputation = answer.Reputation,
-                    UpdatedAt = answer.UpdatedAt,
-                    QuestionId = answer.QuestionId,
-                    IsBestAnswer = answer.IsBestAnswer,
-                    Votes = answer.Votes.Select(v => new VoteDTO
-                    {
-                        Id = v.Id,
-                        VoteType = v.VoteType,
-                        UserId = v.UserId,
-                        PostId = v.PostId,
-                    }).ToList(),
-                },
+                Question question => QuestionDTO.FromQuestion(question),
+                Answer answer => AnswerDTO.FromAnswer(answer),
                 _ => throw new InvalidOperationException($"Unexpected post type: {post.GetType()}")
             }).ToList();
         }
@@ -127,42 +65,7 @@ namespace P2PLearningAPI.Repository
                     .FirstOrDefault(q => q.Id == id);
                 if (questionRes == null)
                     return null;
-                return new QuestionDTO
-                {
-                    Id = questionRes.Id,
-                    Content = questionRes.Content,
-                    Title = questionRes.Title,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = questionRes.PostedBy.Id,
-                        UserName = questionRes.PostedBy.UserName!,
-                        ProfilePicture = questionRes.PostedBy.ProfilePicture,
-                        Email = questionRes.PostedBy.Email!
-                    },
-                    PostedAt = questionRes.PostedAt,
-                    IsClosed = questionRes.IsClosed,
-                    IsUpdated = questionRes.IsUpdated,
-                    Reputation = questionRes.Reputation,
-                    Answers = questionRes.Answers.Select(a => new AnswerDTO
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        Title = a.Title,
-                        PostedBy = new UserMiniDTO
-                        {
-                            Id = a.PostedBy.Id,
-                            UserName = a.PostedBy.UserName!,
-                            ProfilePicture = a.PostedBy.ProfilePicture,
-                            Email = a.PostedBy.Email!
-                        },
-                        PostedAt = a.PostedAt,
-                        IsClosed = a.IsClosed,
-                        IsUpdated = a.IsUpdated,
-                        Reputation = a.Reputation,
-                        IsBestAnswer = a.IsBestAnswer,
-                        QuestionId = questionRes.Id,
-                    }).ToList(),
-                };
+                return QuestionDTO.FromQuestion(questionRes);
             }
             else if (post is Answer answer)
             {
@@ -173,29 +76,7 @@ namespace P2PLearningAPI.Repository
                     .FirstOrDefault(a => a.Id == id);
                 if (answerRes == null)
                     return null;
-                return new AnswerDTO { 
-                    Content = answerRes.Content, 
-                    Title = answerRes.Title, 
-                    PostedBy = new UserMiniDTO {
-                    Id = answerRes.PostedBy.Id,
-                    UserName = answerRes.PostedBy.UserName!,
-                    ProfilePicture = answerRes.PostedBy.ProfilePicture,
-                    Email = answerRes.PostedBy.Email!
-                    },
-                    PostedAt = answerRes.PostedAt,
-                    IsClosed = answerRes.IsClosed,
-                    IsUpdated = answerRes.IsUpdated,
-                    Reputation = answerRes.Reputation,
-                    QuestionId = answerRes.QuestionId,
-                    IsBestAnswer = answerRes.IsBestAnswer,
-                    Votes = answerRes.Votes.Select(v => new VoteDTO
-                    {
-                        Id = v.Id,
-                        VoteType = v.VoteType,
-                        UserId = v.UserId,
-                        PostId = v.PostId,
-                    }).ToList(),
-                };
+                return AnswerDTO.FromAnswer(answerRes);
             }
 
             // If it's neither a Question nor an Answer, return null
@@ -216,40 +97,8 @@ namespace P2PLearningAPI.Repository
             }
             return posts.Select<Post, PostDTO>(post => post switch
             {
-                Question question => new QuestionDTO
-                {
-                    Id = question.Id,
-                    Title = question.Title,
-                    Content = question.Content,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = question.PostedBy.Id,
-                        UserName = question.PostedBy.UserName!,
-                        ProfilePicture = question.PostedBy.ProfilePicture,
-                        Email = question.PostedBy.Email!,
-                    },
-                    PostedAt = question.PostedAt,
-                    IsClosed = question.IsClosed,
-                    IsUpdated = question.IsUpdated,
-                    Reputation = question.Reputation,
-                },
-                Answer answer => new AnswerDTO
-                {
-                    Id = answer.Id,
-                    Title = answer.Title,
-                    Content = answer.Content,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = answer.PostedBy.Id,
-                        UserName = answer.PostedBy.UserName!,
-                        ProfilePicture = answer.PostedBy.ProfilePicture,
-                        Email = answer.PostedBy.Email!,
-                    },
-                    PostedAt = answer.PostedAt,
-                    IsClosed = answer.IsClosed,
-                    IsUpdated = answer.IsUpdated,
-                    Reputation = answer.Reputation,
-                },
+                Question question => QuestionDTO.FromQuestion(question),
+                Answer answer => AnswerDTO.FromAnswer(answer),
                 _ => throw new InvalidOperationException($"Unexpected post type: {post.GetType()}")
             }).ToList();
         }
