@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PLearningAPI.DTOs;
+using P2PLearningAPI.DTOsInput;
+using P2PLearningAPI.DTOsOutput;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -19,7 +21,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Post
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(ICollection<Post>))]
+        [ProducesResponseType(200, Type = typeof(ICollection<PostDTO>))]
         public IActionResult GetPosts()
         {
             var posts = _postRepository.GetPosts();
@@ -31,7 +33,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Post/{id}
         [HttpGet("{id}")]
-        [ProducesResponseType(200, Type = typeof(Post))]
+        [ProducesResponseType(200, Type = typeof(PostDTO))]
         [ProducesResponseType(404)]
         public IActionResult GetPost(long id)
         {
@@ -44,7 +46,7 @@ namespace P2PLearningAPI.Controllers
 
         // GET: api/Post/ByUser/{userId}
         [HttpGet("ByUser/{userId}")]
-        [ProducesResponseType(200, Type = typeof(ICollection<Post>))]
+        [ProducesResponseType(200, Type = typeof(ICollection<PostDTO>))]
         [ProducesResponseType(404)]
         public IActionResult GetPostsByUser(string userId)
         {
@@ -58,7 +60,7 @@ namespace P2PLearningAPI.Controllers
         // POST: api/Post
         [Authorize]
         [HttpPost]
-        [ProducesResponseType(201, Type = typeof(Post))]
+        [ProducesResponseType(201, Type = typeof(PostDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         public IActionResult CreatePost([FromBody] PostCreateDTO postDTO)
@@ -82,10 +84,10 @@ namespace P2PLearningAPI.Controllers
         // PUT: api/Post
         [Authorize]
         [HttpPut]
-        [ProducesResponseType(200, Type = typeof(Post))]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult UpdatePost([FromBody] Post post)
+        public IActionResult UpdatePost([FromBody] PostUpdateDTO post)
         {
             if (post == null)
                 return BadRequest("Invalid post data.");
@@ -93,11 +95,11 @@ namespace P2PLearningAPI.Controllers
             {
                 var authHeader = Request.Headers["Authorization"];
                 string token = authHeader.ToString().Split(" ")[1];
-                var updatedPost = _postRepository.UpdatePost(post, token);
-                if (updatedPost == null)
+                var sucess = _postRepository.UpdatePost(post, token);
+                if (!sucess)
                     return NotFound();
 
-                return Ok(updatedPost);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -176,7 +178,6 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteVote(long postId, [FromBody] Vote vote)
         {
-
             var success = _postRepository.DeleteVote(postId, vote);
             if (!success)
                 return NotFound();

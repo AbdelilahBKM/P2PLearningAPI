@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOsOutput\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

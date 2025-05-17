@@ -1,12 +1,12 @@
 ﻿namespace P2PLearningAPI.DTOsOutput
 {
-    public class QuestionDTO: PostDTO
+    public class AnswerDTO: PostDTO
     {
-        public long DiscussionId { get; set; }
-        public ICollection<AnswerDTO> Answers { get; set; } = new List<AnswerDTO>();
-        public bool isAnswered { get; set; } = false;
-        public QuestionDTO() { }
-        public QuestionDTO(
+        public long? QuestionId { get; set; }
+        public bool IsBestAnswer { get; set; } = false;
+
+        public AnswerDTO() { }
+        public AnswerDTO(
             long Id,
             string Title,
             string Content,
@@ -17,11 +17,11 @@
             UserMiniDTO PostedBy,
             bool IsClosed,
             ICollection<VoteDTO> Votes,
-            long discussionId,
-            ICollection<AnswerDTO> Answers
+            long? questionId,
+            bool isBestAnswer
             ) : base(Id, Title, Content, IsUpdated, Reputation, PostedAt, UpdatedAt, PostedBy, IsClosed, Votes) {
-            this.DiscussionId = discussionId;
-            this.Answers = Answers;
+            this.QuestionId = questionId;
+            this.IsBestAnswer = isBestAnswer;
         }
     }
 }

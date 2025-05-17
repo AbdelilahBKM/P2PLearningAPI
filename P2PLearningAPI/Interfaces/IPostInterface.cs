@@ -1,4 +1,6 @@
 ﻿using P2PLearningAPI.DTOs;
+using P2PLearningAPI.DTOsInput;
+using P2PLearningAPI.DTOsOutput;
 using P2PLearningAPI.Models;
 
 namespace P2PLearningAPI.Interfaces
@@ -11,12 +13,12 @@ namespace P2PLearningAPI.Interfaces
     }
     public interface IPostInterface
     {
-        ICollection<Post> GetPosts();
-        Post? GetPost(long id);
+        ICollection<PostDTO> GetPosts();
+        PostDTO? GetPost(long id);
         bool CheckPostExist(long id);
-        ICollection<Post> GetPostsByUser(string userId);
-        Post CreatePost(PostCreateDTO post, string token);
-        Post UpdatePost(Post post, string token);
+        ICollection<PostDTO> GetPostsByUser(string userId);
+        PostDTO CreatePost(PostCreateDTO post, string token);
+        bool UpdatePost(PostUpdateDTO post, string token);
         bool DeletePost(long id, string token);
         bool ClosePost(long id, string token);
         bool ReopenPost(long id, string token);

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PLearningAPI.Data;
 using P2PLearningAPI.DTOs;
+using P2PLearningAPI.DTOsInput;
+using P2PLearningAPI.DTOsOutput;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Models;
 
@@ -20,16 +22,89 @@ namespace P2PLearningAPI.Repository
         }
 
         // Get all posts
-        public ICollection<Post> GetPosts()
-        {
-            return _context.Posts
+        public ICollection<PostDTO> GetPosts()
+        {   
+            ICollection<Post> posts = _context.Posts
                 .Include(p => p.PostedBy)
                 .ToList();
+            if (posts == null || posts.Count == 0)
+            {
+                _logger.LogWarning("No posts found in the database.");
+                return new List<PostDTO>();
+            }
+            return posts.Select<Post, PostDTO>(post => post switch
+            {
+                Question question => new QuestionDTO
+                {
+                    Id = question.Id,
+                    Title = question.Title,
+                    Content = question.Content,
+                    PostedBy = new UserMiniDTO
+                    {
+                        Id = question.PostedBy.Id,
+                        UserName = question.PostedBy.UserName!,
+                        ProfilePicture = question.PostedBy.ProfilePicture,
+                        Email = question.PostedBy.Email!,
+                    },
+                    PostedAt = question.PostedAt,
+                    IsClosed = question.IsClosed,
+                    IsUpdated = question.IsUpdated,
+                    Reputation = question.Reputation,
+                    DiscussionId = question.DiscussionId,
+                    Answers = question.Answers.Select(a => new AnswerDTO
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        Title = a.Title,
+                        PostedBy = new UserMiniDTO
+                        {
+                            Id = a.PostedBy.Id,
+                            UserName = a.PostedBy.UserName!,
+                            ProfilePicture = a.PostedBy.ProfilePicture,
+                            Email = a.PostedBy.Email!,
+                        },
+                        PostedAt = a.PostedAt,
+                        IsClosed = a.IsClosed,
+                        IsUpdated = a.IsUpdated,
+                        Reputation = a.Reputation,
+                        IsBestAnswer = a.IsBestAnswer,
+                    }).ToList(),
+
+                },
+                Answer answer => new AnswerDTO
+                {
+                    Id = answer.Id,
+                    Title = answer.Title,
+                    Content = answer.Content,
+                    PostedBy = new UserMiniDTO
+                    {
+                        Id = answer.PostedBy.Id,
+                        UserName = answer.PostedBy.UserName!,
+                        ProfilePicture = answer.PostedBy.ProfilePicture,
+                        Email = answer.PostedBy.Email!,
+                    },
+                    PostedAt = answer.PostedAt,
+                    IsClosed = answer.IsClosed,
+                    IsUpdated = answer.IsUpdated,
+                    Reputation = answer.Reputation,
+                    UpdatedAt = answer.UpdatedAt,
+                    QuestionId = answer.QuestionId,
+                    IsBestAnswer = answer.IsBestAnswer,
+                    Votes = answer.Votes.Select(v => new VoteDTO
+                    {
+                        Id = v.Id,
+                        VoteType = v.VoteType,
+                        UserId = v.UserId,
+                        PostId = v.PostId,
+                    }).ToList(),
+                },
+                _ => throw new InvalidOperationException($"Unexpected post type: {post.GetType()}")
+            }).ToList();
         }
 
         // Get a single post by ID
         // Get a single post by ID
-        public Post? GetPost(long id)
+        public PostDTO? GetPost(long id)
         {
             // Get the Post by ID, including related entities (PostedBy, Answers, etc.)
             var post = _context.Posts
@@ -45,20 +120,82 @@ namespace P2PLearningAPI.Repository
             // Check if the post is a Question and return the associated data
             if (post is Question question)
             {
-                return _context.Questions
-                    .Include(q => q.Answers)        // Include Answers for the Question
-                    .ThenInclude(a => a.PostedBy)   // Include PostedBy for the Answers
-                    .Include(q => q.Discussion)     // Include Discussion for the Question
-                    .FirstOrDefault(q => q.Id == id); // Use the ID to ensure you're getting the right Question
+                Question? questionRes = _context.Questions
+                    .Include(q => q.Answers)
+                    .ThenInclude(a => a.PostedBy)
+                    .Include(q => q.Discussion)
+                    .FirstOrDefault(q => q.Id == id);
+                if (questionRes == null)
+                    return null;
+                return new QuestionDTO
+                {
+                    Id = questionRes.Id,
+                    Content = questionRes.Content,
+                    Title = questionRes.Title,
+                    PostedBy = new UserMiniDTO
+                    {
+                        Id = questionRes.PostedBy.Id,
+                        UserName = questionRes.PostedBy.UserName!,
+                        ProfilePicture = questionRes.PostedBy.ProfilePicture,
+                        Email = questionRes.PostedBy.Email!
+                    },
+                    PostedAt = questionRes.PostedAt,
+                    IsClosed = questionRes.IsClosed,
+                    IsUpdated = questionRes.IsUpdated,
+                    Reputation = questionRes.Reputation,
+                    Answers = questionRes.Answers.Select(a => new AnswerDTO
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        Title = a.Title,
+                        PostedBy = new UserMiniDTO
+                        {
+                            Id = a.PostedBy.Id,
+                            UserName = a.PostedBy.UserName!,
+                            ProfilePicture = a.PostedBy.ProfilePicture,
+                            Email = a.PostedBy.Email!
+                        },
+                        PostedAt = a.PostedAt,
+                        IsClosed = a.IsClosed,
+                        IsUpdated = a.IsUpdated,
+                        Reputation = a.Reputation,
+                        IsBestAnswer = a.IsBestAnswer,
+                        QuestionId = questionRes.Id,
+                    }).ToList(),
+                };
             }
-            // Otherwise, check if it's an Answer and return the associated data
             else if (post is Answer answer)
             {
-                return _context.Answers
-                    .Include(a => a.Replies)        // Include Replies for the Answer
-                    .Include(a => a.Question)       // Include the Question the Answer belongs to
-                    .Include(a => a.PostedBy)       // Include PostedBy for the Answer
-                    .FirstOrDefault(a => a.Id == id); // Use the ID to ensure you're getting the right Answer
+                Answer? answerRes = _context.Answers
+                    .Include(a => a.Replies)        
+                    .Include(a => a.Question)       
+                    .Include(a => a.PostedBy)
+                    .FirstOrDefault(a => a.Id == id);
+                if (answerRes == null)
+                    return null;
+                return new AnswerDTO { 
+                    Content = answerRes.Content, 
+                    Title = answerRes.Title, 
+                    PostedBy = new UserMiniDTO {
+                    Id = answerRes.PostedBy.Id,
+                    UserName = answerRes.PostedBy.UserName!,
+                    ProfilePicture = answerRes.PostedBy.ProfilePicture,
+                    Email = answerRes.PostedBy.Email!
+                    },
+                    PostedAt = answerRes.PostedAt,
+                    IsClosed = answerRes.IsClosed,
+                    IsUpdated = answerRes.IsUpdated,
+                    Reputation = answerRes.Reputation,
+                    QuestionId = answerRes.QuestionId,
+                    IsBestAnswer = answerRes.IsBestAnswer,
+                    Votes = answerRes.Votes.Select(v => new VoteDTO
+                    {
+                        Id = v.Id,
+                        VoteType = v.VoteType,
+                        UserId = v.UserId,
+                        PostId = v.PostId,
+                    }).ToList(),
+                };
             }
 
             // If it's neither a Question nor an Answer, return null
@@ -67,11 +204,54 @@ namespace P2PLearningAPI.Repository
 
 
         // Get posts by user ID
-        public ICollection<Post> GetPostsByUser(string userId)
+        public ICollection<PostDTO> GetPostsByUser(string userId)
         {
-            return _context.Posts
+            ICollection<Post> posts = _context.Posts
                 .Include(p => p.PostedBy)
                 .Where(p => p.UserID == userId).ToList();
+            if (posts == null || posts.Count == 0)
+            {
+                _logger.LogWarning($"No posts found for user with ID: {userId}");
+                return new List<PostDTO>();
+            }
+            return posts.Select<Post, PostDTO>(post => post switch
+            {
+                Question question => new QuestionDTO
+                {
+                    Id = question.Id,
+                    Title = question.Title,
+                    Content = question.Content,
+                    PostedBy = new UserMiniDTO
+                    {
+                        Id = question.PostedBy.Id,
+                        UserName = question.PostedBy.UserName!,
+                        ProfilePicture = question.PostedBy.ProfilePicture,
+                        Email = question.PostedBy.Email!,
+                    },
+                    PostedAt = question.PostedAt,
+                    IsClosed = question.IsClosed,
+                    IsUpdated = question.IsUpdated,
+                    Reputation = question.Reputation,
+                },
+                Answer answer => new AnswerDTO
+                {
+                    Id = answer.Id,
+                    Title = answer.Title,
+                    Content = answer.Content,
+                    PostedBy = new UserMiniDTO
+                    {
+                        Id = answer.PostedBy.Id,
+                        UserName = answer.PostedBy.UserName!,
+                        ProfilePicture = answer.PostedBy.ProfilePicture,
+                        Email = answer.PostedBy.Email!,
+                    },
+                    PostedAt = answer.PostedAt,
+                    IsClosed = answer.IsClosed,
+                    IsUpdated = answer.IsUpdated,
+                    Reputation = answer.Reputation,
+                },
+                _ => throw new InvalidOperationException($"Unexpected post type: {post.GetType()}")
+            }).ToList();
         }
 
         // Check if a post exists by ID
@@ -81,7 +261,7 @@ namespace P2PLearningAPI.Repository
         }
 
         // Create a new post
-        public Post CreatePost(PostCreateDTO postDTO, string token)
+        public PostDTO CreatePost(PostCreateDTO postDTO, string token)
         {
             var (userId, _) = _tokenService.DecodeToken(token);
             if (userId != postDTO.PostedBy)
@@ -102,25 +282,27 @@ namespace P2PLearningAPI.Repository
         }
 
         // Update an existing post
-        public Post UpdatePost(Post post, string token)
+        public bool UpdatePost(PostUpdateDTO postDTO, string token)
         {
-            if(post == null)
-                throw new ArgumentNullException(nameof(post));
-            if (!CheckPostExist(post.Id))
+            if(postDTO == null)
+                throw new ArgumentNullException(nameof(postDTO));
+            if (!CheckPostExist(postDTO.Id))
+                throw new InvalidOperationException("Post doesn't exist");
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == postDTO.Id);
+            if (post == null)
                 throw new InvalidOperationException("Post doesn't exist");
             (string userId, _) = _tokenService.DecodeToken(token);
             if (userId != post.UserID)
                 throw new UnauthorizedAccessException("User is not authorized to update this post.");
-            _context.Posts.Update(post);
-            if(Save())
-                return post;
-            throw new InvalidOperationException("Failed to update Post  to the database");
+            post.Title = postDTO.Title;
+            post.Content = postDTO.Content;
+            return Save();
         }
 
         // Close a post by setting IsClosed to true
         public bool ClosePost(long id, string token)
         {
-            var post = GetPost(id);
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == id);
             var (userId, _) = _tokenService.DecodeToken(token);
             if (post == null)
                 throw new InvalidOperationException("Post doesn't exist");
@@ -134,7 +316,7 @@ namespace P2PLearningAPI.Repository
         // Reopen a post by setting IsClosed to false
         public bool ReopenPost(long id, string token)
         {
-            var post = GetPost(id);
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == id);
             if (post == null)
                 return false;
             var (userId, _) = _tokenService.DecodeToken(token);
@@ -148,7 +330,7 @@ namespace P2PLearningAPI.Repository
 
         public bool MarkPostAsSolved(long id, string token)
         {
-            var post = GetPost(id);
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == id);
             if (post == null)
                 return false;
             var (userId, _) = _tokenService.DecodeToken(token);
@@ -166,16 +348,17 @@ namespace P2PLearningAPI.Repository
         // Vote on a post (adjust Reputation)
         public bool VoteOnPost(long postId, Vote vote)
         {
-            var post = GetPost(postId);
+            var post = _context.Posts.FirstOrDefault(p => p.Id == postId);
             if (post == null)
                 return false;
 
             post.AddVote(vote);
             return Save();
         }
+
         public bool DeleteVote(long postId, Vote vote)
         {
-            var post = GetPost(postId);
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == postId);
             if(post == null)
                 return false;
             post.RemoveVote(vote);
@@ -185,7 +368,7 @@ namespace P2PLearningAPI.Repository
         // Delete a post by ID
         public bool DeletePost(long id, string token)
         {
-            var post = GetPost(id);
+            var post = _context.Posts.Include(p => p.PostedBy).FirstOrDefault(p => p.Id == id);
             if (post == null)
                 throw new InvalidOperationException("Post doesn't exist");
             var (userId, _) = _tokenService.DecodeToken(token);

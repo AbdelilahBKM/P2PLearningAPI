@@ -17,68 +17,12 @@ namespace P2PLearningAPI.Repository
             _tokenService = tokenServices;
         }
 
-        public ICollection<DiscussionDTO> GetDiscussions()
+        public ICollection<Discussion> GetDiscussions()
         {
-            return _context.Discussions
-        .Where(d => d.Id == id)
-        .Select(d => new DiscussionDTO
-        {
-            Id = d.Id,
-            D_Name = d.D_Name,
-            D_Profile = d.D_Profile,
-            D_Description = d.D_Description,
-            Number_of_members = d.Number_of_members,
-            Number_of_active_members = d.Number_of_active_members,
-            Number_of_posts = d.Number_of_posts,
-            Owner = new UserMiniDTO
-            {
-                Id = d.Owner.Id,
-                UserName = d.Owner.UserName,
-                ProfilePicture = d.Owner.ProfilePicture
-            },
-            Questions = d.Questions.Select(q => new QuestionDTO
-            {
-                Id = q.Id,
-                Title = q.Title,
-                Content = q.Content,
-                IsAnswered = q.isAnswered,
-                PostedAt = q.PostedAt,
-                PostedBy = new UserMiniDTO
-                {
-                    Id = q.PostedBy.Id,
-                    UserName = q.PostedBy.UserName,
-                    ProfilePicture = q.PostedBy.ProfilePicture
-                },
-                Answers = q.Answers.Select(a => new AnswerDTO
-                {
-                    Id = a.Id,
-                    Content = a.Content,
-                    IsBestAnswer = a.IsBestAnswer,
-                    PostedBy = new UserMiniDTO
-                    {
-                        Id = a.PostedBy.Id,
-                        UserName = a.PostedBy.UserName,
-                        ProfilePicture = a.PostedBy.ProfilePicture
-                    },
-                    Replies = a.Replies.Select(r => new AnswerDTO
-                    {
-                        Id = r.Id,
-                        Content = r.Content,
-                        IsBestAnswer = r.IsBestAnswer,
-                        PostedBy = new UserMiniDTO
-                        {
-                            Id = r.PostedBy.Id,
-                            UserName = r.PostedBy.UserName,
-                            ProfilePicture = r.PostedBy.ProfilePicture
-                        }
-                    }).ToList()
-                }).ToList()
-            }).ToList()
-        })
-        .FirstOrDefault();
+            return _context.Discussions.ToList();
         }
 
-        public DiscussionDTO? GetDiscussion(long id)
+        public Discussion? GetDiscussion(long id)
         {
             return _context.Discussions
                           .Include(d => d.Questions)
@@ -87,7 +31,7 @@ namespace P2PLearningAPI.Repository
                           .ThenInclude(q => q.Answers)
                           .FirstOrDefault(d => d.Id == id);
         }
-        public DiscussionDTO? GetDiscussion(string name)
+        public Discussion? GetDiscussion(string name)
         {
             return _context.Discussions
                             .Include (d => d.Owner)
@@ -112,14 +56,14 @@ namespace P2PLearningAPI.Repository
             return discussion?.Questions.ToList() ?? new List<Question>();
         }
 
-        public ICollection<DiscussionDTO> GetDiscussionsByOwner(string ownerId)
+        public ICollection<Discussion> GetDiscussionsByOwner(string ownerId)
         {
             return _context.Discussions
                           .Where(d => d.OwnerId == ownerId)
                           .ToList();
         }
 
-        public DiscussionDTO CreateDiscussion(Discussion discussion, string token)
+        public Discussion CreateDiscussion(Discussion discussion, string token)
         {
             (var UserId, var _) = _tokenService.DecodeToken(token);
             if (UserId != discussion.OwnerId)
@@ -132,7 +76,7 @@ namespace P2PLearningAPI.Repository
             throw new InvalidOperationException("Failed to save the discussion to the database.");
         }
 
-        public DiscussionDTO UpdateDiscussion(Discussion discussion, string token)
+        public Discussion UpdateDiscussion(Discussion discussion, string token)
         {
             var existingDiscussion = GetDiscussion(discussion.Id);
             if (existingDiscussion == null)
