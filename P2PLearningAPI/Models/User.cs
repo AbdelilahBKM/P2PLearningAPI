@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.SqlServer.Server;
-using System;
-using System.Collections.Generic;
 
 namespace P2PLearningAPI.Models
 {
@@ -10,7 +7,7 @@ namespace P2PLearningAPI.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string? ProfilePicture { get; set; } 
+        public string? ProfilePicture { get; set; }
         public string? Bio { get; set; }
         public bool IsActive { get; set; }
         public UserType UserType { get; set; }
@@ -20,10 +17,11 @@ namespace P2PLearningAPI.Models
         public ICollection<Vote> Votes { get; } = new HashSet<Vote>();
         public ICollection<Request> Requests { get; } = new HashSet<Request>();
         public ICollection<Notification> Notifications { get; } = new HashSet<Notification>();
+        public ICollection<ChatSession> ChatSessions { get; } = new HashSet<ChatSession>();
         public DateTime Last_Login { get; set; }
         public bool AccountDeleted { get; set; } = false;
         public DateTime Created_at { get; set; } = DateTime.Now;
-        public DateTime Updated_at { get; set; } = DateTime.Now; 
+        public DateTime Updated_at { get; set; } = DateTime.Now;
 
         public bool AddRequest(Request request)
         {

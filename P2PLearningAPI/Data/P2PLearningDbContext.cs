@@ -15,6 +15,8 @@ namespace P2PLearningAPI.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ChatSession> ChatSessions { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -26,6 +28,9 @@ namespace P2PLearningAPI.Data
             modelBuilder.Entity<Joining>().HasKey(x => x.Id);
             modelBuilder.Entity<Post>().HasKey(x => x.Id);
             modelBuilder.Entity<Vote>().HasKey(x => x.Id);
+            modelBuilder.Entity<Notification>().HasKey(x => x.Id);
+            modelBuilder.Entity<ChatSession>().HasKey(x => x.SessionId);
+            modelBuilder.Entity<ChatMessage>().HasKey(x => x.Id);
 
             //==> Constraints
 
@@ -111,6 +116,21 @@ namespace P2PLearningAPI.Data
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // User has many ChatSessions
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.ChatSessions)
+                .WithOne(cs => cs.User)
+                .HasForeignKey(cs => cs.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
+            // ChatSession has many ChatMessages
+            modelBuilder.Entity<ChatSession>()
+                .HasMany(cs => cs.History)
+                .WithOne(cm => cm.Session)
+                .HasForeignKey(cm => cm.SessionId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             //==> Indexes for performance
 
@@ -125,6 +145,17 @@ namespace P2PLearningAPI.Data
 
             modelBuilder.Entity<Vote>()
                 .HasIndex(v => v.PostId);
+            modelBuilder.Entity<Vote>()
+                .HasIndex(v => new { v.UserId, v.PostId })
+                .IsUnique(); // Ensure a user can only vote once per post
+            modelBuilder.Entity<Vote>()
+                .HasIndex(v => v.VoteType);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.UserId);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.IsRead);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.NotificationType);
 
         }
 
