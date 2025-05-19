@@ -40,7 +40,11 @@ builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUploadInterface, UploadRepository>();
-builder.Services.AddScoped<IChatSessionInterface, ChatSessionRepository>();
+builder.Services.AddScoped<ISimularityTestInterface, SimularityTest>();
+builder.Services.AddHttpClient<SimilarityService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8000"); // FastAPI base URL
+});
 
 // JWT
 builder.Services.AddAuthentication(options =>

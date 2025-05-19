@@ -8,13 +8,12 @@
         public bool isAnswered { get; set; } = false;
         public Question() { }
         public Question(
-            string Title, 
-            string Content, 
-            string PostedBy, 
+            string Title,
+            string Content,
+            string PostedBy,
             long discussionId
             ): base(Title, Content, PostedBy) {
             this.DiscussionId = discussionId;
         }
-        
     }
 }

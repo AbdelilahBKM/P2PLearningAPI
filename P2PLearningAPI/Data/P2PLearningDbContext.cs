@@ -15,8 +15,6 @@ namespace P2PLearningAPI.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<ChatSession> ChatSessions { get; set; }
-        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -29,8 +27,6 @@ namespace P2PLearningAPI.Data
             modelBuilder.Entity<Post>().HasKey(x => x.Id);
             modelBuilder.Entity<Vote>().HasKey(x => x.Id);
             modelBuilder.Entity<Notification>().HasKey(x => x.Id);
-            modelBuilder.Entity<ChatSession>().HasKey(x => x.SessionId);
-            modelBuilder.Entity<ChatMessage>().HasKey(x => x.Id);
 
             //==> Constraints
 
@@ -113,21 +109,6 @@ namespace P2PLearningAPI.Data
                 .HasOne(p => p.PostedBy)
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.UserID)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // User has many ChatSessions
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.ChatSessions)
-                .WithOne(cs => cs.User)
-                .HasForeignKey(cs => cs.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.NoAction);
-            // ChatSession has many ChatMessages
-            modelBuilder.Entity<ChatSession>()
-                .HasMany(cs => cs.History)
-                .WithOne(cm => cm.Session)
-                .HasForeignKey(cm => cm.SessionId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
