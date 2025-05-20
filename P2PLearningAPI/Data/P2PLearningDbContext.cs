@@ -15,6 +15,8 @@ namespace P2PLearningAPI.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Simularity> Simularities { get; set; } = null!;
+        public DbSet<SimularityQuestion> SimularityQuestions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -111,6 +113,27 @@ namespace P2PLearningAPI.Data
                 .HasForeignKey(p => p.UserID)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Simularity => Question & Answer
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.Simularity)
+                .WithOne(s => s.Question)
+                .HasForeignKey<Simularity>(s => s.QuestionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Simularity-Questions (many-to-many)
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasKey(sq => new { sq.SimularityId, sq.QuestionId });
+
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasOne(sq => sq.Simularity)
+                .WithMany(s => s.SimularityQuestions)
+                .HasForeignKey(sq => sq.SimularityId);
+
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasOne(sq => sq.Question)
+                .WithMany()
+                .HasForeignKey(sq => sq.QuestionId);
 
 
             //==> Indexes for performance

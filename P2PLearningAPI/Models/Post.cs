@@ -20,6 +20,8 @@
             this.Title = Title;
             this.Content = Content;
             this.UserID = PostedBy;
+            this.PostedAt = DateTime.Now;
+            this.UpdatedAt = DateTime.Now;
         }
         public void AddVote(Vote vote)
         {

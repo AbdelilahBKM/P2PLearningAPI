@@ -6,6 +6,7 @@
         public long DiscussionId { get; set; }
         public ICollection<Answer> Answers { get; } = new List<Answer>();
         public bool isAnswered { get; set; } = false;
+        public Simularity? Simularity { get; set; }
         public Question() { }
         public Question(
             string Title,

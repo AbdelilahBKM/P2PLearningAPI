@@ -5,12 +5,10 @@ namespace P2PLearningAPI.Services
     public class SimilarityService
     {
         private readonly HttpClient _httpClient;
-
         public SimilarityService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-
         public async Task<List<CandidateScore>> GetSimilarityScoresAsync(MiniQuestionDTO query, List<long> candidateIds, List<MiniQuestionDTO> candidates)
         {
             var request = new SimilarityRequest

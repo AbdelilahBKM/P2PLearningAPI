@@ -9,6 +9,7 @@ namespace P2PLearningAPI.Models
         public Question? Question { get; set; }
         public Answer? AnswerTo { get; set; }
         public bool IsBestAnswer { get; set; } = false;
+        public bool IsAIGenerated { get; set; } = false;
         public ICollection<Answer> Replies { get; } = new HashSet<Answer>();
 
         public Answer() { }
@@ -17,7 +18,8 @@ namespace P2PLearningAPI.Models
             string Content,
             string PostedBy,
             long id,
-            PostType postType
+            PostType postType,
+            bool isAIGenerated = false
             ) : base(Title, Content, PostedBy)
         {
             if (postType == PostType.Answer)

@@ -6,10 +6,10 @@ namespace P2PLearningAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SimularityTest : Controller
+    public class SimularityAnswer : Controller
     {
-        private readonly ISimularityTestInterface _similarityTestService;
-        public SimularityTest(ISimularityTestInterface similarityTestService)
+        private readonly ISimularityAnswerInterface _similarityTestService;
+        public SimularityAnswer(ISimularityAnswerInterface similarityTestService)
         {
             _similarityTestService = similarityTestService;
         }

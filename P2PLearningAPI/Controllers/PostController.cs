@@ -13,10 +13,12 @@ namespace P2PLearningAPI.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostInterface _postRepository;
+        private readonly ISimularityAnswerInterface _simularityAnswerRepository;
 
-        public PostController(IPostInterface postRepository)
+        public PostController(IPostInterface postRepository, ISimularityAnswerInterface simularityAnswerRepository)
         {
             _postRepository = postRepository;
+            _simularityAnswerRepository = simularityAnswerRepository;
         }
 
         // GET: api/Post
@@ -63,7 +65,7 @@ namespace P2PLearningAPI.Controllers
         [ProducesResponseType(201, Type = typeof(PostDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public IActionResult CreatePost([FromBody] PostCreateDTO postDTO)
+        public async Task<IActionResult> CreatePost([FromBody] PostCreateDTO postDTO)
         {
             if (postDTO == null)
                 return BadRequest("Invalid post data.");
@@ -72,7 +74,16 @@ namespace P2PLearningAPI.Controllers
                 var authHeader = Request.Headers["Authorization"];
                 string token = authHeader.ToString().Split(" ")[1];
                 var createdPost = _postRepository.CreatePost(postDTO, token);
-
+                if(postDTO.PostType == PostType.Question)
+                {
+                    await _simularityAnswerRepository.CreateSimularityAnswerAsync(new MiniQuestionDTO
+                        {
+                            Id = createdPost.Id,
+                            Title = createdPost.Title,
+                            Content = createdPost.Content
+                        }
+                    );
+                }
                 return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
             }
             catch (Exception ex)
