@@ -19,22 +19,28 @@ namespace P2PLearningAPI.Repository
 
         public ICollection<DiscussionDTO> GetDiscussions()
         {
-            ICollection<Discussion> discussions = _context.Discussions
-                    .Include(d => d.Owner)
-                    .Include(d => d.Joinings)
-                        .ThenInclude(j => j.User)
-                    .Include(d => d.Questions)
-                        .ThenInclude(q => q.PostedBy)
-                    .Include(d => d.Questions)
-                        .ThenInclude(q => q.Answers)
-                            .ThenInclude(a => a.PostedBy)
-                    .Include(d => d.Questions)
-                        .ThenInclude(q => q.Votes)
-                    .AsSplitQuery()
-                    .ToList();
-            if (discussions == null || discussions.Count == 0)
-                return new List<DiscussionDTO>();
-            return discussions.Select(d => DiscussionDTO.FromDiscussion(d)).ToList();
+            var discussions = _context.Discussions
+                .Include(d => d.Owner)
+                .Include(d => d.Joinings)
+                    .ThenInclude(j => j.User)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.PostedBy)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.Answers)
+                        .ThenInclude(a => a.PostedBy)
+                .Include(d => d.Questions)
+                    .ThenInclude(q => q.Votes)
+                .AsSplitQuery()
+                .ToList();
+
+            // Filter out discussions without questions
+            var filteredDiscussions = discussions
+                .Where(d => d.Questions != null && d.Questions.Any())
+                .OrderByDescending(d => d.Questions.Max(q => q.Created_at))
+                .Select(d => DiscussionDTO.FromDiscussion(d))
+                .ToList();
+
+            return filteredDiscussions;
         }
 
         public DiscussionDTO? GetDiscussion(long id)

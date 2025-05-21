@@ -9,6 +9,10 @@
 
         public UserMiniDTO()
         {
+            Id = string.Empty;
+            UserName = string.Empty;
+            Email = string.Empty;
+            ProfilePicture = null;
         }
 
         public UserMiniDTO(string id, string userName, string email, string? profilePicture)

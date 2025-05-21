@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using DotNetEnv;
 using P2PLearningAPI.Data;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Repository;
@@ -12,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using P2PLearningAPI.Repositories;
 using P2PLearningAPI.Services;
 using Microsoft.OpenApi.Models;
+using P2PLearningAPI.DTOsOutput;
 
 DotNetEnv.Env.Load();
 
@@ -41,9 +41,10 @@ builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUploadInterface, UploadRepository>();
 builder.Services.AddScoped<ISimularityAnswerInterface, SimularityAnswerRepository>();
+builder.Services.AddScoped<ISimularityInterface, SimularityRepository>();
 builder.Services.AddHttpClient<SimilarityService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8000"); // FastAPI base URL
+    client.BaseAddress = new Uri("http://localhost:8000");
 });
 
 // JWT

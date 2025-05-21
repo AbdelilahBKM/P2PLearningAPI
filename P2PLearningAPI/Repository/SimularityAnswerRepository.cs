@@ -71,7 +71,7 @@ namespace P2PLearningAPI.Repository
 
             // Filter and take top 3 relevant matches
             var accurateScores = similarityScores
-                .Where(cs => cs.Score >= 0.7)
+                .Where(cs => cs.Score >= 0.56)
                 .OrderByDescending(cs => cs.Score)
                 .Take(3)
                 .ToList();
