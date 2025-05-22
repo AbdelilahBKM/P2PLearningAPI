@@ -38,25 +38,26 @@ namespace P2PLearningAPI.DTOsOutput
                 question.Reputation,
                 question.PostedAt,
                 question.UpdatedAt,
-                new UserMiniDTO
+                question.PostedBy == null ? new UserMiniDTO() : new UserMiniDTO
                 {
                     Id = question.PostedBy.Id,
                     UserName = question.PostedBy.UserName!,
                     ProfilePicture = question.PostedBy.ProfilePicture
                 },
                 question.IsClosed,
-                question.Votes.Select(v => new VoteDTO
+                question.Votes?.Select(v => new VoteDTO
                 {
                     Id = v.Id,
                     VoteType = v.VoteType,
                     UserId = v.UserId,
                     PostId = v.PostId
-                }).ToList(),
+                }).ToList() ?? new List<VoteDTO>(),
                 question.DiscussionId,
-                question.Answers.Select(a => AnswerDTO.FromAnswer(a)).ToList(),
+                question.Answers?.Select(a => AnswerDTO.FromAnswer(a)).ToList() ?? new List<AnswerDTO>(),
                 question.isAnswered
             );
         }
+
     }
 
 }

@@ -6,15 +6,16 @@
         public long DiscussionId { get; set; }
         public ICollection<Answer> Answers { get; } = new List<Answer>();
         public bool isAnswered { get; set; } = false;
-        public Question() { }
+        public Simularity? Simularity { get; set; }
+        public SuggestedAnswer? SuggestedAnswer { get; set; } = null!;
+        public Question() {}
         public Question(
-            string Title, 
-            string Content, 
-            string PostedBy, 
+            string Title,
+            string Content,
+            string PostedBy,
             long discussionId
             ): base(Title, Content, PostedBy) {
             this.DiscussionId = discussionId;
         }
-        
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PLearningAPI.Data;
 
@@ -11,9 +12,11 @@ using P2PLearningAPI.Data;
 namespace P2PLearningAPI.Migrations
 {
     [DbContext(typeof(P2PLearningDbContext))]
-    partial class P2PLearningDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520223330_addSimularityTables")]
+    partial class addSimularityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -412,29 +415,6 @@ namespace P2PLearningAPI.Migrations
                     b.ToTable("SimularityQuestions");
                 });
 
-            modelBuilder.Entity("P2PLearningAPI.Models.SuggestedAnswer", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Answer")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId")
-                        .IsUnique();
-
-                    b.ToTable("SuggestedAnswers");
-                });
-
             modelBuilder.Entity("P2PLearningAPI.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -482,10 +462,6 @@ namespace P2PLearningAPI.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -753,17 +729,6 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("Simularity");
                 });
 
-            modelBuilder.Entity("P2PLearningAPI.Models.SuggestedAnswer", b =>
-                {
-                    b.HasOne("P2PLearningAPI.Models.Question", "Question")
-                        .WithOne("SuggestedAnswer")
-                        .HasForeignKey("P2PLearningAPI.Models.SuggestedAnswer", "QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
             modelBuilder.Entity("P2PLearningAPI.Models.Vote", b =>
                 {
                     b.HasOne("P2PLearningAPI.Models.Post", "Post")
@@ -851,8 +816,6 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("Answers");
 
                     b.Navigation("Simularity");
-
-                    b.Navigation("SuggestedAnswer");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,6 +15,9 @@ namespace P2PLearningAPI.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Simularity> Simularities { get; set; } = null!;
+        public DbSet<SimularityQuestion> SimularityQuestions { get; set; } = null!;
+        public DbSet<SuggestedAnswer> SuggestedAnswers { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -26,6 +29,7 @@ namespace P2PLearningAPI.Data
             modelBuilder.Entity<Joining>().HasKey(x => x.Id);
             modelBuilder.Entity<Post>().HasKey(x => x.Id);
             modelBuilder.Entity<Vote>().HasKey(x => x.Id);
+            modelBuilder.Entity<Notification>().HasKey(x => x.Id);
 
             //==> Constraints
 
@@ -111,6 +115,33 @@ namespace P2PLearningAPI.Data
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Simularity => Question & Answer
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.Simularity)
+                .WithOne(s => s.Question)
+                .HasForeignKey<Simularity>(s => s.QuestionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Simularity-Questions (many-to-many)
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasKey(sq => new { sq.SimularityId, sq.QuestionId });
+
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasOne(sq => sq.Simularity)
+                .WithMany(s => s.SimularityQuestions)
+                .HasForeignKey(sq => sq.SimularityId);
+
+            modelBuilder.Entity<SimularityQuestion>()
+                .HasOne(sq => sq.Question)
+                .WithMany()
+                .HasForeignKey(sq => sq.QuestionId);
+
+            // SuggestedAnswer => Question & Answer
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.SuggestedAnswer)
+                .WithOne(sa => sa.Question)
+                .HasForeignKey<SuggestedAnswer>(sa => sa.QuestionId);
+
 
             //==> Indexes for performance
 
@@ -125,6 +156,17 @@ namespace P2PLearningAPI.Data
 
             modelBuilder.Entity<Vote>()
                 .HasIndex(v => v.PostId);
+            modelBuilder.Entity<Vote>()
+                .HasIndex(v => new { v.UserId, v.PostId })
+                .IsUnique(); // Ensure a user can only vote once per post
+            modelBuilder.Entity<Vote>()
+                .HasIndex(v => v.VoteType);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.UserId);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.IsRead);
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.NotificationType);
 
         }
 

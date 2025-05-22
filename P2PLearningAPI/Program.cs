@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using DotNetEnv;
 using P2PLearningAPI.Data;
 using P2PLearningAPI.Interfaces;
 using P2PLearningAPI.Repository;
@@ -40,6 +39,12 @@ builder.Services.AddScoped<IRequestInterface, RequestRepository>();
 builder.Services.AddScoped<IVoteInterface, VoteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUploadInterface, UploadRepository>();
+builder.Services.AddScoped<IAssistantAnswerInterface, SimularityAnswerRepository>();
+builder.Services.AddScoped<IAssistantInterface, AssistantRepository>();
+builder.Services.AddHttpClient<AssistantService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8000");
+});
 
 // JWT
 builder.Services.AddAuthentication(options =>

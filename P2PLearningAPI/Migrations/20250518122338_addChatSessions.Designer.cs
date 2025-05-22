@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PLearningAPI.Data;
 
@@ -11,9 +12,11 @@ using P2PLearningAPI.Data;
 namespace P2PLearningAPI.Migrations
 {
     [DbContext(typeof(P2PLearningDbContext))]
-    partial class P2PLearningDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250518122338_addChatSessions")]
+    partial class addChatSessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,6 +156,61 @@ namespace P2PLearningAPI.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("SessionId")
+                        .IsRequired()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.ChatSession", b =>
+                {
+                    b.Property<long>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("SessionId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SessionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("SessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatSessions");
                 });
 
             modelBuilder.Entity("P2PLearningAPI.Models.Discussion", b =>
@@ -369,72 +427,6 @@ namespace P2PLearningAPI.Migrations
                     b.ToTable("Requests");
                 });
 
-            modelBuilder.Entity("P2PLearningAPI.Models.Simularity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId")
-                        .IsUnique();
-
-                    b.ToTable("Simularities");
-                });
-
-            modelBuilder.Entity("P2PLearningAPI.Models.SimularityQuestion", b =>
-                {
-                    b.Property<long>("SimularityId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
-
-                    b.HasKey("SimularityId", "QuestionId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("SimularityQuestions");
-                });
-
-            modelBuilder.Entity("P2PLearningAPI.Models.SuggestedAnswer", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Answer")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId")
-                        .IsUnique();
-
-                    b.ToTable("SuggestedAnswers");
-                });
-
             modelBuilder.Entity("P2PLearningAPI.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -482,10 +474,6 @@ namespace P2PLearningAPI.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -578,9 +566,6 @@ namespace P2PLearningAPI.Migrations
                     b.Property<long?>("AnswerId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("IsAIGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsBestAnswer")
                         .HasColumnType("bit");
 
@@ -660,6 +645,28 @@ namespace P2PLearningAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("P2PLearningAPI.Models.ChatMessage", b =>
+                {
+                    b.HasOne("P2PLearningAPI.Models.ChatSession", "Session")
+                        .WithMany("History")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("P2PLearningAPI.Models.ChatSession", b =>
+                {
+                    b.HasOne("P2PLearningAPI.Models.User", "User")
+                        .WithMany("ChatSessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("P2PLearningAPI.Models.Discussion", b =>
                 {
                     b.HasOne("P2PLearningAPI.Models.User", "Owner")
@@ -723,47 +730,6 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("P2PLearningAPI.Models.Simularity", b =>
-                {
-                    b.HasOne("P2PLearningAPI.Models.Question", "Question")
-                        .WithOne("Simularity")
-                        .HasForeignKey("P2PLearningAPI.Models.Simularity", "QuestionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
-            modelBuilder.Entity("P2PLearningAPI.Models.SimularityQuestion", b =>
-                {
-                    b.HasOne("P2PLearningAPI.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("P2PLearningAPI.Models.Simularity", "Simularity")
-                        .WithMany("SimularityQuestions")
-                        .HasForeignKey("SimularityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-
-                    b.Navigation("Simularity");
-                });
-
-            modelBuilder.Entity("P2PLearningAPI.Models.SuggestedAnswer", b =>
-                {
-                    b.HasOne("P2PLearningAPI.Models.Question", "Question")
-                        .WithOne("SuggestedAnswer")
-                        .HasForeignKey("P2PLearningAPI.Models.SuggestedAnswer", "QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
             modelBuilder.Entity("P2PLearningAPI.Models.Vote", b =>
                 {
                     b.HasOne("P2PLearningAPI.Models.Post", "Post")
@@ -811,6 +777,11 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("Discussion");
                 });
 
+            modelBuilder.Entity("P2PLearningAPI.Models.ChatSession", b =>
+                {
+                    b.Navigation("History");
+                });
+
             modelBuilder.Entity("P2PLearningAPI.Models.Discussion", b =>
                 {
                     b.Navigation("Joinings");
@@ -823,13 +794,10 @@ namespace P2PLearningAPI.Migrations
                     b.Navigation("Votes");
                 });
 
-            modelBuilder.Entity("P2PLearningAPI.Models.Simularity", b =>
-                {
-                    b.Navigation("SimularityQuestions");
-                });
-
             modelBuilder.Entity("P2PLearningAPI.Models.User", b =>
                 {
+                    b.Navigation("ChatSessions");
+
                     b.Navigation("Joinings");
 
                     b.Navigation("Notifications");
@@ -849,10 +817,6 @@ namespace P2PLearningAPI.Migrations
             modelBuilder.Entity("P2PLearningAPI.Models.Question", b =>
                 {
                     b.Navigation("Answers");
-
-                    b.Navigation("Simularity");
-
-                    b.Navigation("SuggestedAnswer");
                 });
 #pragma warning restore 612, 618
         }
