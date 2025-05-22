@@ -7,7 +7,8 @@
         public ICollection<Answer> Answers { get; } = new List<Answer>();
         public bool isAnswered { get; set; } = false;
         public Simularity? Simularity { get; set; }
-        public Question() { }
+        public SuggestedAnswer? SuggestedAnswer { get; set; } = null!;
+        public Question() {}
         public Question(
             string Title,
             string Content,

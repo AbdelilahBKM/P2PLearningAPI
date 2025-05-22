@@ -5,10 +5,10 @@ using P2PLearningAPI.Interfaces;
 
 namespace P2PLearningAPI.Repository
 {
-    public class SimularityRepository: ISimularityInterface
+    public class AssistantRepository: IAssistantInterface
     {
         private readonly P2PLearningDbContext _context;
-        public SimularityRepository(P2PLearningDbContext context)
+        public AssistantRepository(P2PLearningDbContext context)
         {
             _context = context;
         }
@@ -41,6 +41,20 @@ namespace P2PLearningAPI.Repository
                 .ThenInclude(sq => sq.Question)
                 .Where(s => s.QuestionId == QuestionId)
                 .Select(s => SimularityDTO.FromSimularity(s))
+                .FirstOrDefault();
+        }
+
+        public SuggestedAnswerDTO? GetSuggestedAnswer(long QuestionId)
+        {
+            return _context.SuggestedAnswers
+                .Include(s => s.Question)
+                .Where(s => s.QuestionId == QuestionId)
+                .Select(s => new SuggestedAnswerDTO
+                {
+                    Id = s.Id,
+                    Answer = s.Answer,
+                    QuestionId = s.QuestionId
+                })
                 .FirstOrDefault();
         }
     }

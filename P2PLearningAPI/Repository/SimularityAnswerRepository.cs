@@ -7,16 +7,16 @@ using P2PLearningAPI.Services;
 
 namespace P2PLearningAPI.Repository
 {
-    public class SimularityAnswerRepository: ISimularityAnswerInterface
+    public class SimularityAnswerRepository: IAssistantAnswerInterface
     {
         private readonly HttpClient _httpClient;
-        private readonly SimilarityService _similarityService;
+        private readonly AssistantService _assistantService;
         private readonly P2PLearningDbContext _context;
         public SimularityAnswerRepository(HttpClient httpClient, P2PLearningDbContext context)
         {
             _httpClient = httpClient;
             _context = context;
-            _similarityService = new SimilarityService(httpClient);
+            _assistantService = new AssistantService(httpClient);
         }
 
         public Task<List<CandidateScore>> GetSimilarityScoresAsync(MiniQuestionDTO query)
@@ -37,16 +37,17 @@ namespace P2PLearningAPI.Repository
                     Content = q.Content
                 })
                 .ToList();
-            return _similarityService.GetSimilarityScoresAsync(query, candidateIds, candidates);
+            return _assistantService.GetSimilarityScoresAsync(query, candidateIds, candidates);
         }
 
-        public async Task CreateSimularityAnswerAsync(MiniQuestionDTO query)
+        public async Task<SimularityDTO?> CreateSimularityAnswerAsync(MiniQuestionDTO query)
         {
             // Get the main question entity
             var mainQuestion = await _context.Questions
                 .FirstOrDefaultAsync(q => q.Id == query.Id);
 
-            if (mainQuestion == null) return;
+            if (mainQuestion == null)
+                throw new ArgumentException("Question not found.");
 
             // Get candidate questions (excluding current question)
             var candidates = await _context.Questions
@@ -55,7 +56,7 @@ namespace P2PLearningAPI.Repository
                 .ToListAsync();
 
             if (!candidates.Any())
-                return;
+                return null;
 
             // Get similarity scores
             var candidateIds = candidates.Select(c => c.Id).ToList();
@@ -66,7 +67,7 @@ namespace P2PLearningAPI.Repository
                 Content = c.Content
             }).ToList();
 
-            var similarityScores = await _similarityService
+            var similarityScores = await _assistantService
                 .GetSimilarityScoresAsync(query, candidateIds, candidateDTOs);
 
             // Filter and take top 3 relevant matches
@@ -77,7 +78,7 @@ namespace P2PLearningAPI.Repository
                 .ToList();
 
             if (!accurateScores.Any())
-                return;
+                return null;
 
             // Create new Simularity record
             var similarity = new Simularity(mainQuestion)
@@ -102,6 +103,26 @@ namespace P2PLearningAPI.Repository
             // Save to database
             _context.Simularities.Add(similarity);
             await _context.SaveChangesAsync();
+            return SimularityDTO.FromSimularity(similarity);
+        }
+
+        public async Task<SuggestedAnswerDTO?> CreateSuggestedAnswer(MiniQuestionDTO query)
+        {
+            var suggestedAnswer = await _assistantService.GetSuggestedAnswerAsync(query);
+            var question = await _context.Questions
+                .FirstOrDefaultAsync(q => q.Id == query.Id);
+            if (question != null)
+            {
+                var answer = new SuggestedAnswer
+                {
+                    Question = question,
+                    QuestionId = question.Id,
+                    Answer = suggestedAnswer.Answer
+                };
+                _context.SuggestedAnswers.Add(answer);
+                await _context.SaveChangesAsync();
+            }
+            return suggestedAnswer;
         }
     }
 }

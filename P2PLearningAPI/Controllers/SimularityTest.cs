@@ -8,8 +8,8 @@ namespace P2PLearningAPI.Controllers
     [ApiController]
     public class SimularityAnswer : Controller
     {
-        private readonly ISimularityAnswerInterface _similarityTestService;
-        public SimularityAnswer(ISimularityAnswerInterface similarityTestService)
+        private readonly IAssistantAnswerInterface _similarityTestService;
+        public SimularityAnswer(IAssistantAnswerInterface similarityTestService)
         {
             _similarityTestService = similarityTestService;
         }

@@ -2,10 +2,12 @@
 
 namespace P2PLearningAPI.Interfaces
 {
-    public interface ISimularityInterface
+    public interface IAssistantInterface
     {
         ICollection<SimularityDTO> GetSimularities();
         SimularityDTO? GetSimularityById(long id);
         SimularityDTO? GetSimularity(long QuestionId);
+        SuggestedAnswerDTO? GetSuggestedAnswer(long QuestionId);
+
     }
 }

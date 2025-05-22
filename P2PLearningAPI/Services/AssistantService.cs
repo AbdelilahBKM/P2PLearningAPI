@@ -2,10 +2,14 @@
 
 namespace P2PLearningAPI.Services
 {
-    public class SimilarityService
+    public class SuggestedAnswerOutput
+    {
+        public string Answer { get; set; } = string.Empty;
+    }
+    public class AssistantService
     {
         private readonly HttpClient _httpClient;
-        public SimilarityService(HttpClient httpClient)
+        public AssistantService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
@@ -39,6 +43,21 @@ namespace P2PLearningAPI.Services
 
             var similarityResponse = await response.Content.ReadFromJsonAsync<SimilarityResponse>();
             return similarityResponse?.Results ?? new List<CandidateScore>();
+        }
+
+        public async Task<SuggestedAnswerDTO> GetSuggestedAnswerAsync(MiniQuestionDTO question)
+        {
+            var response = await _httpClient.PostAsJsonAsync(
+                "http://127.0.0.1:8000/assistant/assist",
+                question
+            );
+            response.EnsureSuccessStatusCode();
+            var answer = await response.Content.ReadFromJsonAsync<SuggestedAnswerOutput>();
+            return new SuggestedAnswerDTO
+            {
+                Answer = answer?.Answer ?? string.Empty,
+                QuestionId = question.Id
+            };
         }
 
     }

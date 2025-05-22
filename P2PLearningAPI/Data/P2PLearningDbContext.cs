@@ -17,6 +17,7 @@ namespace P2PLearningAPI.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Simularity> Simularities { get; set; } = null!;
         public DbSet<SimularityQuestion> SimularityQuestions { get; set; } = null!;
+        public DbSet<SuggestedAnswer> SuggestedAnswers { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder   )
         {
@@ -134,6 +135,12 @@ namespace P2PLearningAPI.Data
                 .HasOne(sq => sq.Question)
                 .WithMany()
                 .HasForeignKey(sq => sq.QuestionId);
+
+            // SuggestedAnswer => Question & Answer
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.SuggestedAnswer)
+                .WithOne(sa => sa.Question)
+                .HasForeignKey<SuggestedAnswer>(sa => sa.QuestionId);
 
 
             //==> Indexes for performance

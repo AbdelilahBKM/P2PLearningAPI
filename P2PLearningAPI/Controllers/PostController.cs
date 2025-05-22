@@ -13,9 +13,9 @@ namespace P2PLearningAPI.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostInterface _postRepository;
-        private readonly ISimularityAnswerInterface _simularityAnswerRepository;
+        private readonly IAssistantAnswerInterface _simularityAnswerRepository;
 
-        public PostController(IPostInterface postRepository, ISimularityAnswerInterface simularityAnswerRepository)
+        public PostController(IPostInterface postRepository, IAssistantAnswerInterface simularityAnswerRepository)
         {
             _postRepository = postRepository;
             _simularityAnswerRepository = simularityAnswerRepository;
@@ -76,13 +76,15 @@ namespace P2PLearningAPI.Controllers
                 var createdPost = _postRepository.CreatePost(postDTO, token);
                 if(postDTO.PostType == PostType.Question)
                 {
-                    await _simularityAnswerRepository.CreateSimularityAnswerAsync(new MiniQuestionDTO
-                        {
-                            Id = createdPost.Id,
-                            Title = createdPost.Title,
-                            Content = createdPost.Content
-                        }
-                    );
+                    MiniQuestionDTO question = new MiniQuestionDTO
+                    {
+                        Id = createdPost.Id,
+                        Title = createdPost.Title,
+                        Content = createdPost.Content
+                    };
+                    var simularityAnswer = await _simularityAnswerRepository.CreateSimularityAnswerAsync(question);
+                    if (simularityAnswer == null)
+                        await _simularityAnswerRepository.CreateSuggestedAnswer(question);
                 }
                 return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
             }

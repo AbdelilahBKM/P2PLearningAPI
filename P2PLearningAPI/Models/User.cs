@@ -21,6 +21,7 @@ namespace P2PLearningAPI.Models
         public bool AccountDeleted { get; set; } = false;
         public DateTime Created_at { get; set; } = DateTime.Now;
         public DateTime Updated_at { get; set; } = DateTime.Now;
+        public string Name { get; internal set; }
 
         public bool AddRequest(Request request)
         {

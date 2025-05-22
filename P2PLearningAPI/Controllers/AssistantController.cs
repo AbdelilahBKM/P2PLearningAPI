@@ -6,10 +6,10 @@ namespace P2PLearningAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SimilarQuestions : Controller
+    public class AssistantController : Controller
     {
-        private readonly ISimularityInterface _simularityRepository;
-        public SimilarQuestions(ISimularityInterface simularityRepository)
+        private readonly IAssistantInterface _simularityRepository;
+        public AssistantController(IAssistantInterface simularityRepository)
         {
             _simularityRepository = simularityRepository;
         }
@@ -44,6 +44,17 @@ namespace P2PLearningAPI.Controllers
             if (simularity == null || !ModelState.IsValid)
                 return NotFound();
             return Ok(simularity);
+        }
+        [HttpGet]
+        [Route("SuggestedAnswer/{questionId}")]
+        [ProducesResponseType(200, Type = typeof(SuggestedAnswerDTO))]
+        [ProducesResponseType(404)]
+        public IActionResult GetSuggestedAnswer(long questionId)
+        {
+            var suggestedAnswer = _simularityRepository.GetSuggestedAnswer(questionId);
+            if (suggestedAnswer == null || !ModelState.IsValid)
+                return NotFound();
+            return Ok(suggestedAnswer);
         }
 
     }
